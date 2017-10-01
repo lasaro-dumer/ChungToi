@@ -5,6 +5,9 @@
  */
 package chungtoi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author lasaro
@@ -15,7 +18,7 @@ public class Match {
     private static final char WHITE_CHAR_D = 'c';
     private static final char BLACK_CHAR_P = 'E';
     private static final char BLACK_CHAR_D = 'e';
-    private static final int PLAYER_TIMEOUT = 60;
+    public static final int PLAYER_TIMEOUT = 60;
 
     private Integer whitePlayerId;
     private Integer blackPlayerId;
@@ -64,7 +67,7 @@ public class Match {
     }
 
     private void checkTimeouts() {
-        Long timeSpan = (this.lastActionTime - System.currentTimeMillis()) / 1000;
+        Long timeSpan = (System.currentTimeMillis() - this.lastActionTime) / 1000;
         if (timeSpan >= PLAYER_TIMEOUT) {
             if (this.state == MatchState.WHITE_TURN) {
                 this.state = MatchState.BLACK_WIN_WO;
@@ -111,13 +114,19 @@ public class Match {
 
     public int placePiece(int userId, int position, int orientation) {
         int ret = -1;
-        char piece = '.';
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
-        if (position >= 0 && position <= 8 && (this.board[position] != '.')) {
-            piece = getPieceChar(whitePlayer, blackPlayer, orientation);
+
+        if (position >= 0 && position <= 8 && (this.board[position] == '.') && (whitePlayer || blackPlayer)) {
+            char piece = getPieceChar(whitePlayer, blackPlayer, orientation);
             if (piece != '.') {
                 this.board[position] = piece;
+                this.lastActionTime = System.currentTimeMillis();
+                if (whitePlayer) {
+                    this.state = MatchState.BLACK_TURN;
+                } else {
+                    this.state = MatchState.WHITE_TURN;
+                }
                 ret = 1;
             }
         } else {
@@ -154,35 +163,59 @@ Retorna: 
         boolean blackPlayer = this.isBlackPlayer(userId);
         if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] == '.')) {
             char piece = this.board[currentPosition];
+            int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
+            boolean validDirection = false;
+            List perpendicularMoves = new ArrayList();
+            perpendicularMoves.add(1);
+            perpendicularMoves.add(3);
+            perpendicularMoves.add(4);
+            perpendicularMoves.add(5);
+            perpendicularMoves.add(7);
+            if (currOrientation == 0) {
+                if (perpendicularMoves.contains(direction)) {
+                    validDirection = false;
+                }
+            } else {
+
+            }
+            Movement mov = Movement.calculate(currentPosition, currOrientation, direction, movement);
+
             boolean isPieceOwner = (whitePlayer && (piece == WHITE_CHAR_D || piece == WHITE_CHAR_P))
                     || (blackPlayer && (piece == BLACK_CHAR_D || piece == BLACK_CHAR_P));
+
             if (isPieceOwner) {
                 piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
-            }
-            switch(direction){
-            //Para o sentido do deslocamento deve­se usar a seguinte convenção: 
-                case 0://0 = diagonal esquerda­superior; 
-                    break;
-                case 1://1 = para cima; 
-                    break;
-                case 2://2 = diagonal direita­superior; 
-                    break;
-                case 3://3 = esquerda; 
-                    break;
-                case 4://4 = sem movimento; 
-                    break;
-                case 5://5 = direita; 
-                    break;
-                case 6://6 =diagonal esquerda­inferior; 
-                    break;
-                case 7://7 = para baixo; 
-                    break;
-                case 8://8 = diagonal direita­inferior.
-                    break;
-            }
-            if (piece != '.' && newPosition > -1) {
-                this.board[newPosition] = piece;
-                ret = 1;
+                switch (direction) {
+                    //Para o sentido do deslocamento deve­se usar a seguinte convenção: 
+                    case 0://0 = diagonal esquerda­superior; 
+                        break;
+                    case 1://1 = para cima; 
+                        break;
+                    case 2://2 = diagonal direita­superior; 
+                        break;
+                    case 3://3 = esquerda; 
+                        break;
+                    case 4://4 = sem movimento; 
+                        break;
+                    case 5://5 = direita; 
+                        break;
+                    case 6://6 =diagonal esquerda­inferior; 
+                        break;
+                    case 7://7 = para baixo; 
+                        break;
+                    case 8://8 = diagonal direita­inferior.
+                        break;
+                }
+                if (piece != '.' && newPosition > -1) {
+                    this.board[newPosition] = piece;
+                    this.lastActionTime = System.currentTimeMillis();
+                    if (whitePlayer) {
+                        this.state = MatchState.BLACK_TURN;
+                    } else {
+                        this.state = MatchState.WHITE_TURN;
+                    }
+                    ret = 1;
+                }
             }
         } else {
             ret = 0;

@@ -23,6 +23,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
 
     private final int MAX_MATCHES = 500;
     private final int MAX_PLAYERS = MAX_MATCHES * 2;
+    private final int MATCH_END_LIFE_END = 5;
     private Map<Integer, String> players;
     private List<Match> matches;
     private Integer nextUserId;
@@ -108,7 +109,7 @@ Retorna: ­1 (erro), 0 (ok)
             Match match = it.next();
             if (match.isWhitePlayer(userId) || match.isBlackPlayer(userId)) {
                 match.endMatch(userId);
-                if (!match.isActive() && match.getTimeSinceEnded() >= 60) {
+                if (!match.isActive() && match.getTimeSinceEnded() >= MATCH_END_LIFE_END) {
                     it.remove();
                 }
                 this.matchesSem.release();
@@ -148,18 +149,23 @@ para deslocamento perpendicular ou “e” para deslocamento diagonal)
         if (ret == -1) {
             this.waitQueueSem.acquire();
             this.waitTimeSem.acquire();
+            this.timedOutSem.acquire();
 
             if (this.waitingTime.containsKey(userId)) {
-                Long wt = (this.waitingTime.get(userId) - System.currentTimeMillis()) / 1000;
-                if (wt >= 60) {
+                Long wt = (System.currentTimeMillis() - this.waitingTime.get(userId)) / 1000;
+                if (wt >= Match.PLAYER_TIMEOUT) {
                     this.waitingQueue.remove(userId);
                     this.waitingTime.remove(userId);
-                    ret = -2;//Timeout
+                    this.timedOut.add(userId);
                 } else {
                     ret = 0;
                 }
             }
-
+            if (this.timedOut.contains(userId)) {
+                this.players.remove(userId);
+                ret = -2;//Timeout
+            }
+            this.timedOutSem.release();
             this.waitTimeSem.release();
             this.waitQueueSem.release();
         }
@@ -242,16 +248,15 @@ iniciada: ainda não há dois jogadores registrados na partida), ­3 (
      */
     @Override
     public int placePiece(int userId, int position, int orientation) throws Exception {
-        int ret = 0;
+        int ret = -1;
 
         this.waitQueueSem.acquire();
-
         if (this.waitingQueue.contains(userId)) {
             ret = -2;
         }
-
         this.waitQueueSem.release();
-        if (ret < 0) {
+
+        if (ret == -1) {
             this.matchesSem.acquire();
 
             for (Match match : matches) {
@@ -259,10 +264,9 @@ iniciada: ainda não há dois jogadores registrados na partida), ­3 (
                 boolean isBlack = match.isBlackPlayer(userId);
                 if (isWhite || isBlack) {
                     if (match.isActive()) {
-                        if(match.isMyTurn(userId) == 1){
+                        if (match.isMyTurn(userId) == 1) {
                             ret = match.placePiece(userId, position, orientation);
-                        }
-                        else{
+                        } else {
                             ret = -3;
                         }
                     } else {
@@ -310,10 +314,9 @@ jogadores registrados na partida), ­3 (não é a vez do jogador).
                 boolean isBlack = match.isBlackPlayer(userId);
                 if (isWhite || isBlack) {
                     if (match.isActive()) {
-                        if(match.isMyTurn(userId) == 1){
+                        if (match.isMyTurn(userId) == 1) {
                             ret = match.movePiece(userId, currentPosition, direction, movement, newOrientation);
-                        }
-                        else{
+                        } else {
                             ret = -3;
                         }
                     } else {
@@ -376,7 +379,7 @@ Retorna: string vazio para erro ou string com o nome do oponente
 
         for (Iterator<Match> it = matches.iterator(); it.hasNext();) {
             Match match = it.next();
-            if (!match.isActive() && match.getTimeSinceEnded() >= 60) {
+            if (!match.isActive() && match.getTimeSinceEnded() >= MATCH_END_LIFE_END) {
                 it.remove();
                 removed++;
             }
@@ -392,11 +395,12 @@ Retorna: string vazio para erro ou string com o nome do oponente
 
         this.waitQueueSem.acquire();
         this.waitTimeSem.acquire();
+        this.timedOutSem.acquire();
 
         for (Iterator iterator = waitingTime.keySet().iterator(); iterator.hasNext();) {
             Integer userId = (Integer) iterator.next();
-            Long wt = (this.waitingTime.get(userId) - System.currentTimeMillis()) / 1000;
-            if (wt >= 60) {
+            Long wt = (System.currentTimeMillis() - this.waitingTime.get(userId)) / 1000;
+            if (wt >= Match.PLAYER_TIMEOUT) {
                 this.waitingQueue.remove(userId);
                 this.waitingTime.remove(userId);
                 this.timedOut.add(userId);
@@ -404,6 +408,7 @@ Retorna: string vazio para erro ou string com o nome do oponente
             }
         }
 
+        this.timedOutSem.release();
         this.waitTimeSem.release();
         this.waitQueueSem.release();
 
