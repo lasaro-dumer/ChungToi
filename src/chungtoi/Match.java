@@ -59,6 +59,7 @@ public class Match {
 
     public int isMyTurn(int userId) {
         this.checkTimeouts();
+        this.checkWinConditions();
         if (this.isWhitePlayer(userId)) {
             return this.state.getWhiteResponse();
         } else {
@@ -158,65 +159,33 @@ Retorna: 
      */
     public int movePiece(int userId, int currentPosition, int direction, int movement, int newOrientation) {
         int ret = -1;
-        int newPosition = -1;
+        Movement mov = Movement.INVALID;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
-        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] == '.')) {
+        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.')) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
-            boolean validDirection = false;
-            List perpendicularMoves = new ArrayList();
-            perpendicularMoves.add(1);
-            perpendicularMoves.add(3);
-            perpendicularMoves.add(4);
-            perpendicularMoves.add(5);
-            perpendicularMoves.add(7);
-            if (currOrientation == 0) {
-                if (perpendicularMoves.contains(direction)) {
-                    validDirection = false;
-                }
-            } else {
-
-            }
-            Movement mov = Movement.calculate(currentPosition, currOrientation, direction, movement);
 
             boolean isPieceOwner = (whitePlayer && (piece == WHITE_CHAR_D || piece == WHITE_CHAR_P))
                     || (blackPlayer && (piece == BLACK_CHAR_D || piece == BLACK_CHAR_P));
 
             if (isPieceOwner) {
-                piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
-                switch (direction) {
-                    //Para o sentido do deslocamento deve­se usar a seguinte convenção: 
-                    case 0://0 = diagonal esquerda­superior; 
-                        break;
-                    case 1://1 = para cima; 
-                        break;
-                    case 2://2 = diagonal direita­superior; 
-                        break;
-                    case 3://3 = esquerda; 
-                        break;
-                    case 4://4 = sem movimento; 
-                        break;
-                    case 5://5 = direita; 
-                        break;
-                    case 6://6 =diagonal esquerda­inferior; 
-                        break;
-                    case 7://7 = para baixo; 
-                        break;
-                    case 8://8 = diagonal direita­inferior.
-                        break;
-                }
-                if (piece != '.' && newPosition > -1) {
-                    this.board[newPosition] = piece;
-                    this.lastActionTime = System.currentTimeMillis();
-                    if (whitePlayer) {
-                        this.state = MatchState.BLACK_TURN;
-                    } else {
-                        this.state = MatchState.WHITE_TURN;
-                    }
-                    ret = 1;
-                }
+                mov = Movement.processMovement(currentPosition, currOrientation, direction, movement);
             }
+        }
+
+        if (mov != Movement.INVALID) {
+            char piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
+
+            this.board[currentPosition] = '.';
+            this.board[mov.getNewPosition()] = piece;
+            this.lastActionTime = System.currentTimeMillis();
+            if (whitePlayer) {
+                this.state = MatchState.BLACK_TURN;
+            } else {
+                this.state = MatchState.WHITE_TURN;
+            }
+            ret = 1;
         } else {
             ret = 0;
         }
@@ -235,5 +204,43 @@ Retorna: 
             piece = BLACK_CHAR_D;
         }
         return piece;
+    }
+
+    public boolean canKill() {
+        return this.endedByWhite && this.endedByBlack;
+    }
+
+    private void checkWinConditions() {
+        char[] tb = new char[this.board.length];
+        for (int i = 0; i < tb.length; i++) {
+            tb[i] = (new String(this.board, i, 1)).toUpperCase().toCharArray()[0];
+        }
+
+        char winP = '.';
+        if (tb[0] == tb[1] && tb[0] == tb[2]) {
+            winP = tb[0];
+        } else if (tb[3] == tb[4] && tb[3] == tb[5]) {
+            winP = tb[3];
+        } else if (tb[6] == tb[7] && tb[6] == tb[8]) {
+            winP = tb[6];
+        } else if (tb[0] == tb[3] && tb[0] == tb[6]) {
+            winP = tb[0];
+        } else if (tb[1] == tb[4] && tb[1] == tb[7]) {
+            winP = tb[1];
+        } else if (tb[2] == tb[5] && tb[2] == tb[8]) {
+            winP = tb[2];
+        } else if (tb[0] == tb[7] && tb[4] == tb[8]) {
+            winP = tb[0];
+        } else if (tb[6] == tb[4] && tb[6] == tb[2]) {
+            winP = tb[6];
+        }
+
+        if (winP != '.') {
+            if (winP == WHITE_CHAR_P) {
+                this.state = MatchState.WHITE_WIN;
+            } else if (winP == BLACK_CHAR_P) {
+                this.state = MatchState.BLACK_WIN;
+            }
+        }
     }
 }

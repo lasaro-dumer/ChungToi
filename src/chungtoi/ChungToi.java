@@ -23,7 +23,6 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
 
     private final int MAX_MATCHES = 500;
     private final int MAX_PLAYERS = MAX_MATCHES * 2;
-    private final int MATCH_END_LIFE_END = 5;
     private Map<Integer, String> players;
     private List<Match> matches;
     private Integer nextUserId;
@@ -109,7 +108,7 @@ Retorna: ­1 (erro), 0 (ok)
             Match match = it.next();
             if (match.isWhitePlayer(userId) || match.isBlackPlayer(userId)) {
                 match.endMatch(userId);
-                if (!match.isActive() && match.getTimeSinceEnded() >= MATCH_END_LIFE_END) {
+                if (match.canKill()) {
                     it.remove();
                 }
                 this.matchesSem.release();
@@ -306,7 +305,7 @@ jogadores registrados na partida), ­3 (não é a vez do jogador).
         }
 
         this.waitQueueSem.release();
-        if (ret < 0) {
+        if (ret == 0) {
             this.matchesSem.acquire();
 
             for (Match match : matches) {
@@ -379,7 +378,7 @@ Retorna: string vazio para erro ou string com o nome do oponente
 
         for (Iterator<Match> it = matches.iterator(); it.hasNext();) {
             Match match = it.next();
-            if (!match.isActive() && match.getTimeSinceEnded() >= MATCH_END_LIFE_END) {
+            if (match.canKill()) {
                 it.remove();
                 removed++;
             }

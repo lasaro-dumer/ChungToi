@@ -111,6 +111,18 @@ public class CTClient {
             }
             Thread.sleep(500);
         } while (matchState <= 1);
+        int endRet = this.server.endMatch(this.myUserId);
+        switch (endRet) {
+            case -1:
+                System.out.println("Error ending match.");
+                break;
+            case 0:
+                System.out.println("You gave the match for finished.");
+                break;
+            default:
+                System.out.println("Unknown return trying to give the match for finished.");
+                break;
+        }
     }
 
     private void waitMatchStart() throws Exception {
@@ -173,24 +185,24 @@ public class CTClient {
             System.out.println("Moving pieces.");
 
             try {
-//                System.out.println("What is the current position of the piece?\n[0-8]");
-//                position = scan.nextInt();
-//                System.out.println("What is the direction of the moviment?");
-//                System.out.println("0 - up left");
-//                System.out.println("1 - up");
-//                System.out.println("2 - up right");
-//                System.out.println("3 - left");
-//                System.out.println("4 - still");
-//                System.out.println("5 - right");
-//                System.out.println("6 - down left");
-//                System.out.println("7 - down");
-//                System.out.println("8 - down right");
-//                direction = scan.nextInt();
-//                System.out.println("What is the lenght of the movement?");
-//                movement = scan.nextInt();
-//                System.out.println("What is the new orientation of the piece?");
-//                System.out.println("0 - perpendicular\n1 - diagonal");
-//                newOrientation = scan.nextInt();
+                System.out.println("What is the current position of the piece?\n[0-8]");
+                position = scan.nextInt();
+                System.out.println("What is the direction of the moviment?");
+                System.out.println("0 - up left");
+                System.out.println("1 - up");
+                System.out.println("2 - up right");
+                System.out.println("3 - left");
+                System.out.println("4 - still");
+                System.out.println("5 - right");
+                System.out.println("6 - down left");
+                System.out.println("7 - down");
+                System.out.println("8 - down right");
+                direction = scan.nextInt();
+                System.out.println("What is the lenght of the movement?");
+                movement = scan.nextInt();
+                System.out.println("What is the new orientation of the piece?");
+                System.out.println("0 - perpendicular\n1 - diagonal");
+                newOrientation = scan.nextInt();
             } catch (Exception e) {
             }
 
