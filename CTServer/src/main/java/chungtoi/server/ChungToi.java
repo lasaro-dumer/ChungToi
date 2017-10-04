@@ -50,12 +50,8 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         this.waitQueueSem = new Semaphore(1, true);
     }
 
-    /*
-1) registraJogador
-Recebe: string com o nome do usuário/jogador
-Retorna: id (valor inteiro) do usuário (que corresponde a um número de identificação único para
-este usuário durante uma partida), ­1 se este usuário já está  cadastrado ou ­2 se o número
-máximo de jogadores tiver sido atingido
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int playerSignup(String name) throws Exception {
@@ -89,9 +85,8 @@ máximo de jogadores tiver sido atingido
         return userId;
     }
 
-    /*2) encerraPartida
-Recebe: id do usuário (obtido através da chamada registraJogador)
-Retorna: ­1 (erro), 0 (ok)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int endMatch(int userId) throws Exception {
@@ -122,13 +117,8 @@ Retorna: ­1 (erro), 0 (ok)
         return -1;
     }
 
-    /*3) temPartida
-Recebe: id do usuário (obtido através da chamada registraJogador)
-Retorna: ­2 (tempo de espera esgotado), ­1 (erro), 0 (ainda não há partida), 1 (sim, há partida e o
-jogador inicia jogando com as peças claras, identificadas, por exemplo, com letras de “C” para
-deslocamento perpendicular ou “c” para deslocamento diagonal) ou 2 (sim, há  partida e o
-jogador é o segundo a jogar, com os as peças escuras, identificadas, por exemplo, a letra “E”
-para deslocamento perpendicular ou “e” para deslocamento diagonal)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int haveMatch(int userId) throws Exception {
@@ -172,10 +162,8 @@ para deslocamento perpendicular ou “e” para deslocamento diagonal)
         return ret;
     }
 
-    /*4) ehMinhaVez
-Recebe: id do usuário (obtido através da chamada registraJogador)
-Retorna: ­2 (erro: ainda não há 2 jogadores registrados na partida), ­1 (erro), 0 (não), 1 (sim), 2
-(é o vencedor), 3 (é o perdedor), 4 (houve empate), 5 (vencedor por WO), 6 (perdedor por WO)
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int isMyTurn(int userId) throws Exception {
@@ -204,20 +192,8 @@ Retorna: ­2 (erro: ainda não há 2 jogadores registrados na partida)
         return ret;
     }
 
-    /*5) obtemTabuleiro
-Recebe: id do usuário (obtido através da chamada registraJogador)
-Retorna: string vazio em caso de erro ou string representando o tabuleiro de jogo
-O tabuleiro pode, por exemplo, ser representado por 9 caracteres indicando respectivamente o
-estado de cada casa (de 0 até 8) do tabuleiro: 'C' (peça clara no sentido perpendicular), 'c' (peça
-clara no sentido diagonal), 'E' (peça escura no sentido perpendicular), 'e' (peça escura no sentido
-diagonal), '.' (casa não ocupada). Por exemplo, para a Figura 2g, a representação do tabuleiro
-corresponderia ao seguinte  string  “C.E.e.CEc”, que, em uma interface de texto poderia ser
-mostrado como:
-C|.|E
-­+­+­
-.|e|.
-­+­+­
-C|E|c
+    /**
+     * {@inheritDoc}
      */
     @Override
     public String getBoard(int userId) throws Exception {
