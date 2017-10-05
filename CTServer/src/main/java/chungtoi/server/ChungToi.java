@@ -24,29 +24,17 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
 
     private final int MAX_MATCHES = 500;
     private final int MAX_PLAYERS = MAX_MATCHES * 2;
-    private Map<Integer, String> players;
-    private List<Match> matches;
+    private Map<Integer, Player> players;
     private Integer nextUserId;
     private Queue<Integer> waitingQueue;
-    private Map<Integer, Long> waitingTime;
-    private List<Integer> timedOut;
     private final Semaphore playerSem;
-    private final Semaphore waitTimeSem;
-    private final Semaphore matchesSem;
-    private final Semaphore timedOutSem;
     private final Semaphore waitQueueSem;
 
     public ChungToi() throws Exception {
         this.players = new HashMap<>();
-        this.waitingTime = new HashMap<>();
-        this.matches = new ArrayList<>();
-        this.timedOut = new ArrayList<>();
         this.nextUserId = 1;
         this.waitingQueue = new ArrayBlockingQueue(this.MAX_PLAYERS);
         this.playerSem = new Semaphore(1, true);
-        this.waitTimeSem = new Semaphore(1, true);
-        this.matchesSem = new Semaphore(1, true);
-        this.timedOutSem = new Semaphore(1, true);
         this.waitQueueSem = new Semaphore(1, true);
     }
 
@@ -56,7 +44,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     @Override
     public int playerSignup(String name) throws Exception {
         this.playerSem.acquire();
-        if (this.players.values().contains(name)) {
+        if (this.players.values().stream().filter(p -> p.getName().equals(name)).count() > 0) {
             return -1;
         }
         if (this.players.size() == this.MAX_PLAYERS) {
@@ -64,23 +52,22 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         }
         int userId = this.nextUserId;
         this.nextUserId++;
-        this.players.put(userId, name);
-        this.playerSem.release();
+        Player player = new Player(userId, name);
+        this.players.put(userId, player);
         System.out.println(String.format("Player %s joined an has the user id '%s'", name, userId));
 
         this.waitQueueSem.acquire();
-        this.waitTimeSem.acquire();
-
         this.waitingQueue.add(userId);
-        this.waitingTime.put(userId, System.currentTimeMillis());
         if (this.waitingQueue.size() > 1) {
-            Match createdMatch = this.createMatch(this.waitingQueue.poll(), this.waitingQueue.poll());
-            this.waitingTime.remove(createdMatch.getWhitePlayerId());
-            this.waitingTime.remove(createdMatch.getBlackPlayerId());
+            Integer whitePlayerId = this.waitingQueue.poll();
+            Integer blackPlayerId = this.waitingQueue.poll();
+            Match match = new Match(whitePlayerId, blackPlayerId);
+            this.players.get(whitePlayerId).setMatch(match);
+            this.players.get(blackPlayerId).setMatch(match);
+            System.out.println(String.format("Match started. Player %s against %s", this.players.get(whitePlayerId).getName(), this.players.get(blackPlayerId).getName()));
         }
-
-        this.waitTimeSem.release();
         this.waitQueueSem.release();
+        this.playerSem.release();
 
         return userId;
     }
@@ -90,31 +77,14 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
      */
     @Override
     public int endMatch(int userId) throws Exception {
+        int ret = -1;
         this.playerSem.acquire();
-
         if (this.players.containsKey(userId)) {
+            this.players.get(userId).getMatch().endMatch(userId);
             this.players.remove(userId);
         }
-
         this.playerSem.release();
-
-        this.matchesSem.acquire();
-
-        for (Iterator<Match> it = matches.iterator(); it.hasNext();) {
-            Match match = it.next();
-            if (match.isWhitePlayer(userId) || match.isBlackPlayer(userId)) {
-                match.endMatch(userId);
-                if (match.canKill()) {
-                    it.remove();
-                }
-                this.matchesSem.release();
-                return 0;
-            }
-        }
-
-        this.matchesSem.release();
-
-        return -1;
+        return ret;
     }
 
     /**
@@ -123,41 +93,29 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     @Override
     public int haveMatch(int userId) throws Exception {
         int ret = -1;
-        this.matchesSem.acquire();
-        for (Match match : matches) {
-            if (match.isWhitePlayer(userId)) {
-                ret = 1;
-                break;
-            } else if (match.isBlackPlayer(userId)) {
-                ret = 2;
-                break;
+        Player player = null;
+        this.playerSem.acquire();
+        if (this.players.containsKey(userId)) {
+            player = this.players.get(userId);
+            if (player.isTimedOut()) {
+                this.waitQueueSem.acquire();
+                this.waitingQueue.remove(userId);
+                this.waitQueueSem.release();
+                this.players.remove(userId);
+                ret = -2;
+                player = null;
             }
         }
+        this.playerSem.release();
 
-        this.matchesSem.release();
-
-        if (ret == -1) {
-            this.waitQueueSem.acquire();
-            this.waitTimeSem.acquire();
-            this.timedOutSem.acquire();
-
-            if (this.waitingTime.containsKey(userId)) {
-                Long wt = (System.currentTimeMillis() - this.waitingTime.get(userId)) / 1000;
-                if (wt >= Match.PLAYER_TIMEOUT) {
-                    this.waitingQueue.remove(userId);
-                    this.waitingTime.remove(userId);
-                    this.timedOut.add(userId);
-                } else {
-                    ret = 0;
-                }
+        if (player != null) {
+            if (player.getMatch() == null) {
+                ret = 0;
+            } else if (player.getMatch().isWhitePlayer(userId)) {
+                ret = 1;
+            } else if (player.getMatch().isBlackPlayer(userId)) {
+                ret = 2;
             }
-            if (this.timedOut.contains(userId)) {
-                this.players.remove(userId);
-                ret = -2;//Timeout
-            }
-            this.timedOutSem.release();
-            this.waitTimeSem.release();
-            this.waitQueueSem.release();
         }
         return ret;
     }
@@ -177,17 +135,11 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         this.waitQueueSem.release();
 
         if (ret == -1) {
-            this.matchesSem.acquire();
-
-            for (Match match : matches) {
-                boolean isWhite = match.isWhitePlayer(userId);
-                boolean isBlack = match.isBlackPlayer(userId);
-                if (isWhite || isBlack) {
-                    ret = match.isMyTurn(userId);
-                }
+            this.playerSem.acquire();
+            if (this.players.containsKey(userId)) {
+                ret = this.players.get(userId).isMyTurn();
             }
-
-            this.matchesSem.release();
+            this.playerSem.release();
         }
         return ret;
     }
@@ -198,29 +150,17 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     @Override
     public String getBoard(int userId) throws Exception {
         String ret = "";
-        this.matchesSem.acquire();
-
-        for (Match match : matches) {
-            boolean isWhite = match.isWhitePlayer(userId);
-            boolean isBlack = match.isBlackPlayer(userId);
-            if (isWhite || isBlack) {
-                ret = match.getBoard(userId);
-            }
+        this.playerSem.acquire();
+        if (this.players.containsKey(userId)) {
+            ret = this.players.get(userId).getBoard();
         }
-
-        this.matchesSem.release();
+        this.playerSem.release();
 
         return ret;
     }
 
-    /*6) posicionaPeca
-Recebe: id do usuário (obtido através da chamada registraJogador), posição do tabuleiro onde a
-peça deve ser posicionada (de 0 até 8, inclusive) e orientação da peça (0 correspondendo à
-orientação perpendicular, e 1 correspondendo à orientação diagonal).
-Retorna: 2 (partida encerrada, o que ocorrerá caso o jogador demore muito para enviar a sua
-jogada e ocorra o  time­out  de 60 segundos para envio de jogadas), 1 (tudo certo), 0 (posição
-inválida, por exemplo, devido a uma casa já ocupada), ­1 (parâmetros inválidos), ­2 (partida não
-iniciada: ainda não há dois jogadores registrados na partida), ­3 (não é a vez do jogador).
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int placePiece(int userId, int position, int orientation) throws Exception {
@@ -233,161 +173,88 @@ iniciada: ainda não há dois jogadores registrados na partida), ­3 (
         this.waitQueueSem.release();
 
         if (ret == -1) {
-            this.matchesSem.acquire();
-
-            for (Match match : matches) {
-                boolean isWhite = match.isWhitePlayer(userId);
-                boolean isBlack = match.isBlackPlayer(userId);
-                if (isWhite || isBlack) {
-                    if (match.isActive()) {
-                        if (match.isMyTurn(userId) == 1) {
-                            ret = match.placePiece(userId, position, orientation);
-                        } else {
-                            ret = -3;
-                        }
-                    } else {
-                        ret = 2;
-                    }
-                    break;
-                }
+            this.playerSem.acquire();
+            if (this.players.containsKey(userId)) {
+                ret = this.players.get(userId).placePiece(position, orientation);
             }
-
-            this.matchesSem.release();
+            this.playerSem.release();
         }
         return ret;
     }
 
-    /*7) movePeca
-Recebe: id do usuário (obtido através da chamada registraJogador), posição do tabuleiro onde se
-encontra a peça que se deseja mover (de 0 até 8, inclusive), sentido do deslocamento (0 a 8,
-inclusive), número de casas deslocadas (0, 1 ou 2) e orientação da peça depois da jogada (0
-correspondendo a orientação perpendicular, e 1 correspondendo à orientação diagonal). Para o
-sentido do deslocamento deve­se usar a seguinte convenção: 0 = diagonal esquerda­superior; 1 =
-para cima; 2 = diagonal direita­superior; 3 = esquerda; 4 = sem movimento; 5 = direita; 6 =
-diagonal esquerda­inferior; 7 = para baixo; 8 = diagonal direita­inferior.
-Retorna: 2 (partida encerrada, o que ocorrerá caso o jogador demore muito para enviar a sua
-jogada e ocorra o time­out de 60 segundos para envio de jogadas), 1 (tudo certo), 0 (movimento
-inválido, por exemplo, em um sentido e deslocamento que resulta em uma posição ocupada ou
-fora   do   tabuleiro),   ­1   (parâmetros   inválidos),   ­2   (partida   não   iniciada:   ainda   não   há   dois
-jogadores registrados na partida), ­3 (não é a vez do jogador).
+    /**
+     * {@inheritDoc}
      */
     @Override
     public int movePiece(int userId, int currentPosition, int direction, int movement, int newOrientation) throws Exception {
         int ret = 0;
 
         this.waitQueueSem.acquire();
-
         if (this.waitingQueue.contains(userId)) {
             ret = -2;
         }
-
         this.waitQueueSem.release();
-        if (ret == 0) {
-            this.matchesSem.acquire();
 
-            for (Match match : matches) {
-                boolean isWhite = match.isWhitePlayer(userId);
-                boolean isBlack = match.isBlackPlayer(userId);
-                if (isWhite || isBlack) {
-                    if (match.isActive()) {
-                        if (match.isMyTurn(userId) == 1) {
-                            ret = match.movePiece(userId, currentPosition, direction, movement, newOrientation);
-                        } else {
-                            ret = -3;
-                        }
-                    } else {
-                        ret = 2;
-                    }
-                    break;
+        if (ret == 0) {
+            this.playerSem.acquire();
+            if (this.players.containsKey(userId)) {
+                Player player = this.players.get(userId);
+                if (player.getMatch().isActive()) {
+                    ret = player.movePiece(currentPosition, direction, movement, newOrientation);
+                } else {
+                    ret = 2;
                 }
             }
-
-            this.matchesSem.release();
+            this.playerSem.release();
         }
         return ret;
     }
 
-    /*8) obtemOponente
-Recebe: id do usuário (obtido através da chamada registraJogador)
-Retorna: string vazio para erro ou string com o nome do oponente
+    /**
+     * {@inheritDoc}
      */
     @Override
     public String getOpponent(int userId) throws Exception {
         String ret = "";
-
         this.playerSem.acquire();
-        this.matchesSem.acquire();
-
-        for (Match match : matches) {
-            if (match.isWhitePlayer(userId)) {
-                ret = this.players.get(match.getBlackPlayerId());
-            } else if (match.isBlackPlayer(userId)) {
-                ret = this.players.get(match.getWhitePlayerId());
-            }
-            if (!ret.equals("")) {
-                break;
+        if (this.players.containsKey(userId)) {
+            Player player = this.players.get(userId);
+            if (player.isWhitePlayer()) {
+                ret = this.players.get(player.getMatch().getBlackPlayerId()).getName();
+            } else if (player.isBlackPlayer(userId)) {
+                ret = this.players.get(player.getMatch().getWhitePlayerId()).getName();
             }
         }
-
-        this.matchesSem.release();
         this.playerSem.release();
-
         return ret;
-    }
-
-    private Match createMatch(Integer whitePlayerId, Integer blackPlayerId) throws Exception {
-        Match match = new Match(whitePlayerId, blackPlayerId);
-
-        this.matchesSem.acquire();
-
-        this.matches.add(match);
-
-        this.matchesSem.release();
-
-        System.out.println(String.format("Match started. Player %s against %s", this.players.get(whitePlayerId), this.players.get(blackPlayerId)));
-        return match;
-    }
-
-    public int clearEndedMatches() throws Exception {
-        int removed = 0;
-
-        this.matchesSem.acquire();
-
-        for (Iterator<Match> it = matches.iterator(); it.hasNext();) {
-            Match match = it.next();
-            if (match.canKill()) {
-                it.remove();
-                removed++;
-            }
-        }
-
-        this.matchesSem.release();
-
-        return removed;
     }
 
     public int checkPlayersTimeouts() throws Exception {
         int removed = 0;
 
+        this.playerSem.acquire();
         this.waitQueueSem.acquire();
-        this.waitTimeSem.acquire();
-        this.timedOutSem.acquire();
-
-        for (Iterator iterator = waitingTime.keySet().iterator(); iterator.hasNext();) {
-            Integer userId = (Integer) iterator.next();
-            Long wt = (System.currentTimeMillis() - this.waitingTime.get(userId)) / 1000;
-            if (wt >= Match.PLAYER_TIMEOUT) {
-                this.waitingQueue.remove(userId);
-                this.waitingTime.remove(userId);
-                this.timedOut.add(userId);
+        for (Iterator it = this.waitingQueue.stream().iterator(); it.hasNext();) {
+            Player player = this.players.get((Integer) it.next());
+            if (player.isTimedOut() || (player.getMatch() != null && !player.getMatch().isActive())) {
+                this.players.remove(player.getUserId());
                 removed++;
             }
         }
-
-        this.timedOutSem.release();
-        this.waitTimeSem.release();
         this.waitQueueSem.release();
-
+        this.playerSem.release();
         return removed;
+    }
+
+    public String printStatus() throws InterruptedException {
+        StringBuilder sb = new StringBuilder();
+
+        this.playerSem.acquire();
+        this.waitQueueSem.acquire();
+        sb.append("Players online: " + this.players.size() + "\n");
+        sb.append("Player wainting a match: " + this.waitingQueue.size());
+        this.waitQueueSem.release();
+        this.playerSem.release();
+        return sb.toString();
     }
 }

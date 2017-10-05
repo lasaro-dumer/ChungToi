@@ -37,14 +37,11 @@ public class CTServer {
                 @Override
                 public void run() {
                     try {
-                        int removedMatches = chungToi.clearEndedMatches();
-                        if (removedMatches > 0) {
-                            System.out.println(String.format("Removed %s matches.", removedMatches));
-                        }
                         int removedPlayers = chungToi.checkPlayersTimeouts();
                         if (removedPlayers > 0) {
                             System.out.println(String.format("Removed %s players", removedPlayers));
                         }
+                        System.out.println(chungToi.printStatus());
                     } catch (Exception e) {
                         System.out.println(String.format("Exception in scheduled task: %s", e.getMessage()));
                     }

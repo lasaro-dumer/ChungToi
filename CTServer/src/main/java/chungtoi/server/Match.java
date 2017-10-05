@@ -26,6 +26,8 @@ public class Match {
     private Long lastActionTime, endedTime;
     private boolean endedByWhite, endedByBlack;
     private char[] board;
+    private int whitePiecesCount;
+    private int blackPiecesCount;
 
     public Match(Integer whitePlayerId, Integer blackPlayerId) {
         this.whitePlayerId = whitePlayerId;
@@ -39,6 +41,8 @@ public class Match {
         for (int i = 0; i < board.length; i++) {
             board[i] = '.';
         }
+        this.whitePiecesCount = 0;
+        this.blackPiecesCount = 0;
     }
 
     public Integer getWhitePlayerId() {
@@ -114,18 +118,24 @@ public class Match {
     }
 
     public int placePiece(int userId, int position, int orientation) {
+        if (!(this.isMyTurn(userId) == 1)) {
+            return -3;
+        }
         int ret = -1;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
 
-        if (position >= 0 && position <= 8 && (this.board[position] == '.') && (whitePlayer || blackPlayer)) {
+        if (position >= 0 && position <= 8 && (this.board[position] == '.')
+                && ((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3))) {
             char piece = getPieceChar(whitePlayer, blackPlayer, orientation);
             if (piece != '.') {
                 this.board[position] = piece;
                 this.lastActionTime = System.currentTimeMillis();
                 if (whitePlayer) {
+                    this.whitePiecesCount++;
                     this.state = MatchState.BLACK_TURN;
                 } else {
+                    this.blackPiecesCount++;
                     this.state = MatchState.WHITE_TURN;
                 }
                 ret = 1;
@@ -133,6 +143,7 @@ public class Match {
         } else {
             ret = 0;
         }
+
         return ret;
     }
 
@@ -162,6 +173,12 @@ Retorna: 
         Movement mov = Movement.INVALID;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
+
+        if ((whitePlayer && this.state == MatchState.BLACK_TURN)
+                || (blackPlayer && this.state == MatchState.WHITE_TURN)) {
+            return -3;
+        }
+
         if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.')) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
