@@ -239,7 +239,7 @@ public class CTClient {
         String board = this.server.getBoard(this.myUserId);
         if (!board.equals("")) {
             char[] boardChars = board.toCharArray();
-            board = String.format("%s|%s|%s\n­+­+­\n%s|%s|%s\n­+­+­\n%s|%s|%s\n", boardChars[0], boardChars[1], boardChars[2], boardChars[3], boardChars[4], boardChars[5], boardChars[6], boardChars[7], boardChars[8]);
+            board = String.format(" %s|%s|%s\n­ -+-­+-­\n %s|%s|%s\n -­+-­+-­\n %s|%s|%s\n", boardChars[0], boardChars[1], boardChars[2], boardChars[3], boardChars[4], boardChars[5], boardChars[6], boardChars[7], boardChars[8]);
             System.out.println(board);
         }
     }

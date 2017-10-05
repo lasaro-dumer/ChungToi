@@ -83,16 +83,13 @@ public class Match {
     }
 
     public void endMatch(int userId) {
-        if (this.isActive()) {
-            return;
-        }
         if (this.isWhitePlayer(userId) && !this.endedByWhite) {
             this.endedByWhite = true;
         } else if (this.isBlackPlayer(userId) && !this.endedByBlack) {
             this.endedByBlack = true;
         }
 
-        if (this.endedByBlack && this.endedByWhite) {
+        if (this.endedByBlack && this.endedByWhite && this.endedTime == null) {
             this.endedTime = System.currentTimeMillis();
         }
     }
@@ -103,7 +100,7 @@ public class Match {
 
     public boolean isActive() {
         this.checkTimeouts();
-        if (this.state.isEndState()) {
+        if (this.state.isEndState() && this.endedTime == null) {
             this.endedTime = System.currentTimeMillis();
         }
         return this.endedTime == null;
@@ -118,12 +115,13 @@ public class Match {
     }
 
     public int placePiece(int userId, int position, int orientation) {
-        if (!(this.isMyTurn(userId) == 1)) {
-            return -3;
-        }
         int ret = -1;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
+        if ((whitePlayer && this.state != MatchState.WHITE_TURN)
+                || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
+            return -3;
+        }
 
         if (position >= 0 && position <= 8 && (this.board[position] == '.')
                 && ((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3))) {
@@ -147,38 +145,17 @@ public class Match {
         return ret;
     }
 
-    /*7) movePeca
-Recebe: id do usuário (obtido através da chamada registraJogador),
-    posição do tabuleiro onde se encontra a peça que se deseja mover (de 0 até 8, inclusive),
-    sentido do deslocamento (0 a 8, inclusive), 
-    número de casas deslocadas (0, 1 ou 2) e 
-    orientação da peça depois da jogada (0 correspondendo a orientação perpendicular, e 1 correspondendo à orientação diagonal). 
-    Para o sentido do deslocamento deve­se usar a seguinte convenção: 
-        0 = diagonal esquerda­superior; 
-        1 = para cima; 
-        2 = diagonal direita­superior; 
-        3 = esquerda; 
-        4 = sem movimento; 
-        5 = direita; 
-        6 =diagonal esquerda­inferior; 
-        7 = para baixo; 
-        8 = diagonal direita­inferior.
-Retorna: 
-        1 (tudo certo), 
-        0 (movimento inválido, por exemplo, em um sentido e deslocamento que resulta em uma posição ocupada ou fora   do   tabuleiro),  
-        ­1   (parâmetros   inválidos)
-     */
     public int movePiece(int userId, int currentPosition, int direction, int movement, int newOrientation) {
         int ret = -1;
         Movement mov = Movement.INVALID;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
 
-        if ((whitePlayer && this.state == MatchState.BLACK_TURN)
-                || (blackPlayer && this.state == MatchState.WHITE_TURN)) {
+        if ((whitePlayer && this.state != MatchState.WHITE_TURN)
+                || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
             return -3;
         }
-
+        System.out.println("is player turn " + userId);
         if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.')) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
@@ -190,8 +167,8 @@ Retorna: 
                 mov = Movement.processMovement(currentPosition, currOrientation, direction, movement);
             }
         }
-
-        if (mov != Movement.INVALID) {
+        System.out.println("movement " + mov);
+        if (mov != Movement.INVALID && this.board[mov.getNewPosition()] != '.') {
             char piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
 
             this.board[currentPosition] = '.';
@@ -221,10 +198,6 @@ Retorna: 
             piece = BLACK_CHAR_D;
         }
         return piece;
-    }
-
-    public boolean canKill() {
-        return this.endedByWhite && this.endedByBlack;
     }
 
     private void checkWinConditions() {

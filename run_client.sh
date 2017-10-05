@@ -1,1 +1,1 @@
-java -cp build/classes/ chungtoi.CTClient localhost
+clear && java -jar CTClient/target/CTClient-1.0-jar-with-dependencies.jar localhost

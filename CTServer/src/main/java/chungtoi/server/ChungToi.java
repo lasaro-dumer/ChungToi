@@ -6,15 +6,16 @@
 package chungtoi.server;
 
 import chungtoi.common.CTInterface;
+
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -29,13 +30,16 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     private Queue<Integer> waitingQueue;
     private final Semaphore playerSem;
     private final Semaphore waitQueueSem;
+    private SimpleDateFormat sdf;
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public ChungToi() throws Exception {
         this.players = new HashMap<>();
         this.nextUserId = 1;
         this.waitingQueue = new ArrayBlockingQueue(this.MAX_PLAYERS);
         this.playerSem = new Semaphore(1, true);
         this.waitQueueSem = new Semaphore(1, true);
+        this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");    
     }
 
     /**
@@ -78,12 +82,15 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     @Override
     public int endMatch(int userId) throws Exception {
         int ret = -1;
+        System.out.println(userId + " ending match...");
         this.playerSem.acquire();
         if (this.players.containsKey(userId)) {
             this.players.get(userId).getMatch().endMatch(userId);
             this.players.remove(userId);
+            ret = 0;
         }
         this.playerSem.release();
+        System.out.println(userId + " end match status: " + ret);
         return ret;
     }
 
@@ -229,6 +236,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         return ret;
     }
 
+    @SuppressWarnings("rawtypes")
     public int checkPlayersTimeouts() throws Exception {
         int removed = 0;
 
@@ -236,6 +244,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         this.waitQueueSem.acquire();
         for (Iterator it = this.waitingQueue.stream().iterator(); it.hasNext();) {
             Player player = this.players.get((Integer) it.next());
+            System.out.println();
             if (player.isTimedOut() || (player.getMatch() != null && !player.getMatch().isActive())) {
                 this.players.remove(player.getUserId());
                 removed++;
@@ -248,9 +257,12 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
 
     public String printStatus() throws InterruptedException {
         StringBuilder sb = new StringBuilder();
+        long currMilliseconds = System.currentTimeMillis();
+        Date resultdate = new Date(currMilliseconds);
 
         this.playerSem.acquire();
         this.waitQueueSem.acquire();
+        sb.append("Server time: " + sdf.format(resultdate) + "\n");
         sb.append("Players online: " + this.players.size() + "\n");
         sb.append("Player wainting a match: " + this.waitingQueue.size());
         this.waitQueueSem.release();
