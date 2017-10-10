@@ -156,7 +156,7 @@ public class Match {
             return -3;
         }
         System.out.println("is player turn " + userId);
-        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.')) {
+        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.') && (newOrientation != 0 || newOrientation != 1)) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
 
@@ -166,9 +166,15 @@ public class Match {
             if (isPieceOwner) {
                 mov = Movement.processMovement(currentPosition, currOrientation, direction, movement);
             }
+        } else {
+            return ret;
         }
-        System.out.println("movement " + mov);
-        if (mov != Movement.INVALID && this.board[mov.getNewPosition()] != '.') {
+
+        boolean moveIsValid = (mov != Movement.STILL && this.board[mov.getNewPosition()] == '.')
+                || (mov == Movement.STILL && this.board[mov.getNewPosition()] != '.');
+        System.out.println("movement:" + mov + " and moveIsValid:" + moveIsValid);
+        System.out.println("newPosition[" + mov.getNewPosition() + "]= " + this.board[mov.getNewPosition()]);
+        if (mov != Movement.INVALID && moveIsValid) {
             char piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
 
             this.board[currentPosition] = '.';
@@ -219,7 +225,7 @@ public class Match {
             winP = tb[1];
         } else if (tb[2] == tb[5] && tb[2] == tb[8]) {
             winP = tb[2];
-        } else if (tb[0] == tb[7] && tb[4] == tb[8]) {
+        } else if (tb[0] == tb[4] && tb[4] == tb[8]) {
             winP = tb[0];
         } else if (tb[6] == tb[4] && tb[6] == tb[2]) {
             winP = tb[6];

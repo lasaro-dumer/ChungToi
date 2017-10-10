@@ -69,7 +69,7 @@ public class CTClient {
         this.opponent = this.server.getOpponent(this.myUserId);
         System.out.println(String.format("Your match is against %s. You are %s. And the best will win.", opponent, this.myColor.getName()));
         int matchState = 0;
-
+        int errorCount = 0;
         //Keep in the loop while the match is active
         gameloop:
         do {
@@ -81,15 +81,22 @@ public class CTClient {
             switch (matchState) {
                 case -2:
                     //no opponent yet
+                    errorCount = 0;
                     continue;
                 case -1:
                     System.out.println("Error");
+                    errorCount++;
+                    if (errorCount > 10) {
+                        break gameloop;
+                    }
                     break;
                 case 0:
                     //not your turn yet
+                    errorCount = 0;
                     continue;
                 case 1:
                     System.out.println("Your turn!");
+                    errorCount = 0;
                     makeMove();
                     break;
                 case 2:
@@ -239,7 +246,9 @@ public class CTClient {
         String board = this.server.getBoard(this.myUserId);
         if (!board.equals("")) {
             char[] boardChars = board.toCharArray();
-            board = String.format(" %s|%s|%s\n­ -+-­+-­\n %s|%s|%s\n -­+-­+-­\n %s|%s|%s\n", boardChars[0], boardChars[1], boardChars[2], boardChars[3], boardChars[4], boardChars[5], boardChars[6], boardChars[7], boardChars[8]);
+            board = String.format(" %s|%s|%s\n", boardChars[0], boardChars[1], boardChars[2]);
+            board += String.format(" %s|%s|%s\n", boardChars[3], boardChars[4], boardChars[5]);
+            board += String.format(" %s|%s|%s\n", boardChars[6], boardChars[7], boardChars[8]);
             System.out.println(board);
         }
     }

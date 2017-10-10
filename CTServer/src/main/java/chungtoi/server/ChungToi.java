@@ -16,6 +16,8 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -39,7 +41,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
         this.waitingQueue = new ArrayBlockingQueue(this.MAX_PLAYERS);
         this.playerSem = new Semaphore(1, true);
         this.waitQueueSem = new Semaphore(1, true);
-        this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");    
+        this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     }
 
     /**
@@ -82,7 +84,8 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     @Override
     public int endMatch(int userId) throws Exception {
         int ret = -1;
-        System.out.println(userId + " ending match...");
+        String p = this.players.get(userId).toString();
+        System.out.println(p + " logging out...");
         this.playerSem.acquire();
         if (this.players.containsKey(userId)) {
             this.players.get(userId).getMatch().endMatch(userId);
@@ -90,7 +93,7 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
             ret = 0;
         }
         this.playerSem.release();
-        System.out.println(userId + " end match status: " + ret);
+        System.out.println(p + " logged out");
         return ret;
     }
 
@@ -240,18 +243,38 @@ public class ChungToi extends UnicastRemoteObject implements CTInterface {
     public int checkPlayersTimeouts() throws Exception {
         int removed = 0;
 
+        System.out.println("Checking timeouts..");
         this.playerSem.acquire();
         this.waitQueueSem.acquire();
         for (Iterator it = this.waitingQueue.stream().iterator(); it.hasNext();) {
             Player player = this.players.get((Integer) it.next());
-            System.out.println();
+            System.out.println(player.toString());
             if (player.isTimedOut() || (player.getMatch() != null && !player.getMatch().isActive())) {
+                System.out.println("Removing " + player + " by timeout.");
                 this.players.remove(player.getUserId());
                 removed++;
             }
         }
+        List<Integer> toRemove = new ArrayList<>();
+        for (Map.Entry<Integer, Player> entry : players.entrySet()) {
+            Integer userId = entry.getKey();
+            Player player = entry.getValue();
+            if (player.getMatch() != null && !player.getMatch().isActive()) {
+                Long wt = (System.currentTimeMillis() - player.getMatch().getTimeSinceEnded()) / 1000;
+                //wait 10 seconds before forcing the player out
+                if ((wt >= 10)) {
+                    toRemove.add(userId);
+                }
+            }
+        }
+        for (Integer userId : toRemove) {
+            System.out.println("Removing " + this.players.get(userId) + " by match ended.");
+            this.players.remove(userId);
+            removed++;
+        }
         this.waitQueueSem.release();
         this.playerSem.release();
+        System.out.println("ended checking timeouts");
         return removed;
     }
 
