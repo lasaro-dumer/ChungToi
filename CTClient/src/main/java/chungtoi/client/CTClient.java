@@ -148,6 +148,7 @@ public class CTClient {
                 case 2:
                     this.inMatch = true;
                     this.myColor = MyColorEnum.BLACK;
+                    break;
                 case 0:
                     //no match, continue querying;
                     break;

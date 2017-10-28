@@ -5,6 +5,13 @@
     <artifactId>ChungToi</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.heroku.sdk</groupId>
+            <artifactId>heroku-maven-plugin</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+    </dependencies>
     <modules>
         <module>CTCommon</module>
         <module>CTServer</module>
@@ -13,4 +20,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.heroku.sdk</groupId>
+                <artifactId>heroku-maven-plugin</artifactId>
+                <version>1.2.1</version>
+            </plugin>
+        </plugins>
+    </build>
 </project>
