@@ -5,7 +5,8 @@
  */
 package chungtoi.client;
 
-import chungtoi.common.CTInterface;
+import chungtoi.client.proxy.ChungToiWS;
+import chungtoi.client.proxy.ChungToi;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Scanner;
@@ -16,7 +17,7 @@ import java.util.Scanner;
  */
 public class CTClient {
 
-    private CTInterface server;
+    private ChungToi server;
     private int myUserId;
     private String name;
     private boolean inMatch;
@@ -30,7 +31,12 @@ public class CTClient {
             System.exit(1);
         }
         try {
-            CTInterface chungToi = (CTInterface) Naming.lookup("//" + args[0] + "/ChungToi");
+            /*
+            ChungToiImpl chungToi = (CTInterface) Naming.lookup("//" + args[0] + "/ChungToi");
+            */
+            ChungToiWS service = new ChungToiWS();
+            ChungToi chungToi = service.getChungToiPort();
+
             CTClient client = new CTClient(chungToi);
             client.signup();
             client.play();
@@ -41,7 +47,7 @@ public class CTClient {
         }
     }
 
-    private CTClient(CTInterface chungToi) {
+    private CTClient(ChungToi chungToi) {
         this.server = chungToi;
         this.placedPieces = 0;
     }

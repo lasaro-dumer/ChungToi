@@ -1,2 +1,5 @@
 cd CTClient/src/main/java/
-wsimport -keep -p chungtoi.client.proxy http://xps:8080/ctwebservice/SampleServiceService?wsdl
+rm -rf chungtoi/client/proxy
+wsimport -keep -p chungtoi.client.proxy http://localhost:8080/ctwebservice/ChungToiWS?wsdl
+cd ../../../
+mvn clean install | grep -e '^\[[[:alpha:]]'

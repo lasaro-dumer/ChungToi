@@ -13,7 +13,6 @@
         </dependency>
     </dependencies>
     <modules>
-        <module>CTCommon</module>
         <module>CTServer</module>
         <module>CTClient</module>
     </modules>
