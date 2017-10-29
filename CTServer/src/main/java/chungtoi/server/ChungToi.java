@@ -492,6 +492,6 @@ public class ChungToi {
     }
 
     private void log(Exception ex){
-        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), ex.getStackTrace()));
+        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), ex.getStackTrace().toString()));
     }
 }

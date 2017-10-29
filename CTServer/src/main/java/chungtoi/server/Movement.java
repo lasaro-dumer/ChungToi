@@ -12,6 +12,7 @@ import java.util.Map;
  *
  * @author Lásaro
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 public enum Movement {
     UP_LEFT(0, false, -4), UP(1, true, -3), UP_RIGHT(2, false, -2), LEFT(3, true, -1),
     STILL(4, true, 0),
