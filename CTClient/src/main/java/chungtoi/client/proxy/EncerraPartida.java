@@ -7,16 +7,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for getOpponent complex type.
+ * <p>Java class for encerraPartida complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="getOpponent">
+ * &lt;complexType name="encerraPartida">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="userId" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -26,27 +26,27 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "getOpponent", propOrder = {
-    "name"
+@XmlType(name = "encerraPartida", propOrder = {
+    "userId"
 })
-public class GetOpponent {
+public class EncerraPartida {
 
-    protected int name;
+    protected int userId;
 
     /**
-     * Gets the value of the name property.
+     * Gets the value of the userId property.
      * 
      */
-    public int getName() {
-        return name;
+    public int getUserId() {
+        return userId;
     }
 
     /**
-     * Sets the value of the name property.
+     * Sets the value of the userId property.
      * 
      */
-    public void setName(int value) {
-        this.name = value;
+    public void setUserId(int value) {
+        this.userId = value;
     }
 
 }

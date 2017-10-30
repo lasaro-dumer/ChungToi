@@ -24,22 +24,24 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _EndMatchResponse_QNAME = new QName("http://server.chungtoi/", "endMatchResponse");
-    private final static QName _HaveMatch_QNAME = new QName("http://server.chungtoi/", "haveMatch");
-    private final static QName _EndMatch_QNAME = new QName("http://server.chungtoi/", "endMatch");
-    private final static QName _GetOpponent_QNAME = new QName("http://server.chungtoi/", "getOpponent");
-    private final static QName _HaveMatchResponse_QNAME = new QName("http://server.chungtoi/", "haveMatchResponse");
-    private final static QName _GetOpponentResponse_QNAME = new QName("http://server.chungtoi/", "getOpponentResponse");
-    private final static QName _PlacePieceResponse_QNAME = new QName("http://server.chungtoi/", "placePieceResponse");
-    private final static QName _IsMyTurnResponse_QNAME = new QName("http://server.chungtoi/", "isMyTurnResponse");
-    private final static QName _PlayerSignup_QNAME = new QName("http://server.chungtoi/", "playerSignup");
-    private final static QName _IsMyTurn_QNAME = new QName("http://server.chungtoi/", "isMyTurn");
-    private final static QName _MovePiece_QNAME = new QName("http://server.chungtoi/", "movePiece");
-    private final static QName _PlacePiece_QNAME = new QName("http://server.chungtoi/", "placePiece");
-    private final static QName _MovePieceResponse_QNAME = new QName("http://server.chungtoi/", "movePieceResponse");
-    private final static QName _GetBoard_QNAME = new QName("http://server.chungtoi/", "getBoard");
-    private final static QName _GetBoardResponse_QNAME = new QName("http://server.chungtoi/", "getBoardResponse");
-    private final static QName _PlayerSignupResponse_QNAME = new QName("http://server.chungtoi/", "playerSignupResponse");
+    private final static QName _PreRegistroResponse_QNAME = new QName("http://server.chungtoi/", "preRegistroResponse");
+    private final static QName _PosicionaPeca_QNAME = new QName("http://server.chungtoi/", "posicionaPeca");
+    private final static QName _TemPartidaResponse_QNAME = new QName("http://server.chungtoi/", "temPartidaResponse");
+    private final static QName _ObtemOponente_QNAME = new QName("http://server.chungtoi/", "obtemOponente");
+    private final static QName _PosicionaPecaResponse_QNAME = new QName("http://server.chungtoi/", "posicionaPecaResponse");
+    private final static QName _PreRegistro_QNAME = new QName("http://server.chungtoi/", "preRegistro");
+    private final static QName _RegistraJogadorResponse_QNAME = new QName("http://server.chungtoi/", "registraJogadorResponse");
+    private final static QName _EncerraPartida_QNAME = new QName("http://server.chungtoi/", "encerraPartida");
+    private final static QName _ObtemOponenteResponse_QNAME = new QName("http://server.chungtoi/", "obtemOponenteResponse");
+    private final static QName _MovePecaResponse_QNAME = new QName("http://server.chungtoi/", "movePecaResponse");
+    private final static QName _RegistraJogador_QNAME = new QName("http://server.chungtoi/", "registraJogador");
+    private final static QName _ObtemTabuleiroResponse_QNAME = new QName("http://server.chungtoi/", "obtemTabuleiroResponse");
+    private final static QName _TemPartida_QNAME = new QName("http://server.chungtoi/", "temPartida");
+    private final static QName _EhMinhaVez_QNAME = new QName("http://server.chungtoi/", "ehMinhaVez");
+    private final static QName _ObtemTabuleiro_QNAME = new QName("http://server.chungtoi/", "obtemTabuleiro");
+    private final static QName _EncerraPartidaResponse_QNAME = new QName("http://server.chungtoi/", "encerraPartidaResponse");
+    private final static QName _EhMinhaVezResponse_QNAME = new QName("http://server.chungtoi/", "ehMinhaVezResponse");
+    private final static QName _MovePeca_QNAME = new QName("http://server.chungtoi/", "movePeca");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: chungtoi.client.proxy
@@ -49,275 +51,309 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link PlayerSignupResponse }
+     * Create an instance of {@link MovePeca }
      * 
      */
-    public PlayerSignupResponse createPlayerSignupResponse() {
-        return new PlayerSignupResponse();
+    public MovePeca createMovePeca() {
+        return new MovePeca();
     }
 
     /**
-     * Create an instance of {@link GetBoard }
+     * Create an instance of {@link EncerraPartidaResponse }
      * 
      */
-    public GetBoard createGetBoard() {
-        return new GetBoard();
+    public EncerraPartidaResponse createEncerraPartidaResponse() {
+        return new EncerraPartidaResponse();
     }
 
     /**
-     * Create an instance of {@link GetBoardResponse }
+     * Create an instance of {@link EhMinhaVezResponse }
      * 
      */
-    public GetBoardResponse createGetBoardResponse() {
-        return new GetBoardResponse();
+    public EhMinhaVezResponse createEhMinhaVezResponse() {
+        return new EhMinhaVezResponse();
     }
 
     /**
-     * Create an instance of {@link MovePieceResponse }
+     * Create an instance of {@link ObtemTabuleiro }
      * 
      */
-    public MovePieceResponse createMovePieceResponse() {
-        return new MovePieceResponse();
+    public ObtemTabuleiro createObtemTabuleiro() {
+        return new ObtemTabuleiro();
     }
 
     /**
-     * Create an instance of {@link MovePiece }
+     * Create an instance of {@link EhMinhaVez }
      * 
      */
-    public MovePiece createMovePiece() {
-        return new MovePiece();
+    public EhMinhaVez createEhMinhaVez() {
+        return new EhMinhaVez();
     }
 
     /**
-     * Create an instance of {@link PlacePiece }
+     * Create an instance of {@link MovePecaResponse }
      * 
      */
-    public PlacePiece createPlacePiece() {
-        return new PlacePiece();
+    public MovePecaResponse createMovePecaResponse() {
+        return new MovePecaResponse();
     }
 
     /**
-     * Create an instance of {@link IsMyTurn }
+     * Create an instance of {@link RegistraJogador }
      * 
      */
-    public IsMyTurn createIsMyTurn() {
-        return new IsMyTurn();
+    public RegistraJogador createRegistraJogador() {
+        return new RegistraJogador();
     }
 
     /**
-     * Create an instance of {@link PlayerSignup }
+     * Create an instance of {@link ObtemTabuleiroResponse }
      * 
      */
-    public PlayerSignup createPlayerSignup() {
-        return new PlayerSignup();
+    public ObtemTabuleiroResponse createObtemTabuleiroResponse() {
+        return new ObtemTabuleiroResponse();
     }
 
     /**
-     * Create an instance of {@link IsMyTurnResponse }
+     * Create an instance of {@link TemPartida }
      * 
      */
-    public IsMyTurnResponse createIsMyTurnResponse() {
-        return new IsMyTurnResponse();
+    public TemPartida createTemPartida() {
+        return new TemPartida();
     }
 
     /**
-     * Create an instance of {@link GetOpponentResponse }
+     * Create an instance of {@link EncerraPartida }
      * 
      */
-    public GetOpponentResponse createGetOpponentResponse() {
-        return new GetOpponentResponse();
+    public EncerraPartida createEncerraPartida() {
+        return new EncerraPartida();
     }
 
     /**
-     * Create an instance of {@link PlacePieceResponse }
+     * Create an instance of {@link ObtemOponenteResponse }
      * 
      */
-    public PlacePieceResponse createPlacePieceResponse() {
-        return new PlacePieceResponse();
+    public ObtemOponenteResponse createObtemOponenteResponse() {
+        return new ObtemOponenteResponse();
     }
 
     /**
-     * Create an instance of {@link GetOpponent }
+     * Create an instance of {@link ObtemOponente }
      * 
      */
-    public GetOpponent createGetOpponent() {
-        return new GetOpponent();
+    public ObtemOponente createObtemOponente() {
+        return new ObtemOponente();
     }
 
     /**
-     * Create an instance of {@link HaveMatchResponse }
+     * Create an instance of {@link PosicionaPecaResponse }
      * 
      */
-    public HaveMatchResponse createHaveMatchResponse() {
-        return new HaveMatchResponse();
+    public PosicionaPecaResponse createPosicionaPecaResponse() {
+        return new PosicionaPecaResponse();
     }
 
     /**
-     * Create an instance of {@link EndMatch }
+     * Create an instance of {@link PreRegistro }
      * 
      */
-    public EndMatch createEndMatch() {
-        return new EndMatch();
+    public PreRegistro createPreRegistro() {
+        return new PreRegistro();
     }
 
     /**
-     * Create an instance of {@link EndMatchResponse }
+     * Create an instance of {@link RegistraJogadorResponse }
      * 
      */
-    public EndMatchResponse createEndMatchResponse() {
-        return new EndMatchResponse();
+    public RegistraJogadorResponse createRegistraJogadorResponse() {
+        return new RegistraJogadorResponse();
     }
 
     /**
-     * Create an instance of {@link HaveMatch }
+     * Create an instance of {@link TemPartidaResponse }
      * 
      */
-    public HaveMatch createHaveMatch() {
-        return new HaveMatch();
+    public TemPartidaResponse createTemPartidaResponse() {
+        return new TemPartidaResponse();
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EndMatchResponse }{@code >}}
+     * Create an instance of {@link PosicionaPeca }
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "endMatchResponse")
-    public JAXBElement<EndMatchResponse> createEndMatchResponse(EndMatchResponse value) {
-        return new JAXBElement<EndMatchResponse>(_EndMatchResponse_QNAME, EndMatchResponse.class, null, value);
+    public PosicionaPeca createPosicionaPeca() {
+        return new PosicionaPeca();
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link HaveMatch }{@code >}}
+     * Create an instance of {@link PreRegistroResponse }
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "haveMatch")
-    public JAXBElement<HaveMatch> createHaveMatch(HaveMatch value) {
-        return new JAXBElement<HaveMatch>(_HaveMatch_QNAME, HaveMatch.class, null, value);
+    public PreRegistroResponse createPreRegistroResponse() {
+        return new PreRegistroResponse();
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link EndMatch }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link PreRegistroResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "endMatch")
-    public JAXBElement<EndMatch> createEndMatch(EndMatch value) {
-        return new JAXBElement<EndMatch>(_EndMatch_QNAME, EndMatch.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "preRegistroResponse")
+    public JAXBElement<PreRegistroResponse> createPreRegistroResponse(PreRegistroResponse value) {
+        return new JAXBElement<PreRegistroResponse>(_PreRegistroResponse_QNAME, PreRegistroResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link GetOpponent }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link PosicionaPeca }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "getOpponent")
-    public JAXBElement<GetOpponent> createGetOpponent(GetOpponent value) {
-        return new JAXBElement<GetOpponent>(_GetOpponent_QNAME, GetOpponent.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "posicionaPeca")
+    public JAXBElement<PosicionaPeca> createPosicionaPeca(PosicionaPeca value) {
+        return new JAXBElement<PosicionaPeca>(_PosicionaPeca_QNAME, PosicionaPeca.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link HaveMatchResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link TemPartidaResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "haveMatchResponse")
-    public JAXBElement<HaveMatchResponse> createHaveMatchResponse(HaveMatchResponse value) {
-        return new JAXBElement<HaveMatchResponse>(_HaveMatchResponse_QNAME, HaveMatchResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "temPartidaResponse")
+    public JAXBElement<TemPartidaResponse> createTemPartidaResponse(TemPartidaResponse value) {
+        return new JAXBElement<TemPartidaResponse>(_TemPartidaResponse_QNAME, TemPartidaResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link GetOpponentResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ObtemOponente }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "getOpponentResponse")
-    public JAXBElement<GetOpponentResponse> createGetOpponentResponse(GetOpponentResponse value) {
-        return new JAXBElement<GetOpponentResponse>(_GetOpponentResponse_QNAME, GetOpponentResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "obtemOponente")
+    public JAXBElement<ObtemOponente> createObtemOponente(ObtemOponente value) {
+        return new JAXBElement<ObtemOponente>(_ObtemOponente_QNAME, ObtemOponente.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link PlacePieceResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link PosicionaPecaResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "placePieceResponse")
-    public JAXBElement<PlacePieceResponse> createPlacePieceResponse(PlacePieceResponse value) {
-        return new JAXBElement<PlacePieceResponse>(_PlacePieceResponse_QNAME, PlacePieceResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "posicionaPecaResponse")
+    public JAXBElement<PosicionaPecaResponse> createPosicionaPecaResponse(PosicionaPecaResponse value) {
+        return new JAXBElement<PosicionaPecaResponse>(_PosicionaPecaResponse_QNAME, PosicionaPecaResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IsMyTurnResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link PreRegistro }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "isMyTurnResponse")
-    public JAXBElement<IsMyTurnResponse> createIsMyTurnResponse(IsMyTurnResponse value) {
-        return new JAXBElement<IsMyTurnResponse>(_IsMyTurnResponse_QNAME, IsMyTurnResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "preRegistro")
+    public JAXBElement<PreRegistro> createPreRegistro(PreRegistro value) {
+        return new JAXBElement<PreRegistro>(_PreRegistro_QNAME, PreRegistro.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link PlayerSignup }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link RegistraJogadorResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "playerSignup")
-    public JAXBElement<PlayerSignup> createPlayerSignup(PlayerSignup value) {
-        return new JAXBElement<PlayerSignup>(_PlayerSignup_QNAME, PlayerSignup.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "registraJogadorResponse")
+    public JAXBElement<RegistraJogadorResponse> createRegistraJogadorResponse(RegistraJogadorResponse value) {
+        return new JAXBElement<RegistraJogadorResponse>(_RegistraJogadorResponse_QNAME, RegistraJogadorResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IsMyTurn }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link EncerraPartida }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "isMyTurn")
-    public JAXBElement<IsMyTurn> createIsMyTurn(IsMyTurn value) {
-        return new JAXBElement<IsMyTurn>(_IsMyTurn_QNAME, IsMyTurn.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "encerraPartida")
+    public JAXBElement<EncerraPartida> createEncerraPartida(EncerraPartida value) {
+        return new JAXBElement<EncerraPartida>(_EncerraPartida_QNAME, EncerraPartida.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link MovePiece }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ObtemOponenteResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "movePiece")
-    public JAXBElement<MovePiece> createMovePiece(MovePiece value) {
-        return new JAXBElement<MovePiece>(_MovePiece_QNAME, MovePiece.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "obtemOponenteResponse")
+    public JAXBElement<ObtemOponenteResponse> createObtemOponenteResponse(ObtemOponenteResponse value) {
+        return new JAXBElement<ObtemOponenteResponse>(_ObtemOponenteResponse_QNAME, ObtemOponenteResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link PlacePiece }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link MovePecaResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "placePiece")
-    public JAXBElement<PlacePiece> createPlacePiece(PlacePiece value) {
-        return new JAXBElement<PlacePiece>(_PlacePiece_QNAME, PlacePiece.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "movePecaResponse")
+    public JAXBElement<MovePecaResponse> createMovePecaResponse(MovePecaResponse value) {
+        return new JAXBElement<MovePecaResponse>(_MovePecaResponse_QNAME, MovePecaResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link MovePieceResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link RegistraJogador }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "movePieceResponse")
-    public JAXBElement<MovePieceResponse> createMovePieceResponse(MovePieceResponse value) {
-        return new JAXBElement<MovePieceResponse>(_MovePieceResponse_QNAME, MovePieceResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "registraJogador")
+    public JAXBElement<RegistraJogador> createRegistraJogador(RegistraJogador value) {
+        return new JAXBElement<RegistraJogador>(_RegistraJogador_QNAME, RegistraJogador.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link GetBoard }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link ObtemTabuleiroResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "getBoard")
-    public JAXBElement<GetBoard> createGetBoard(GetBoard value) {
-        return new JAXBElement<GetBoard>(_GetBoard_QNAME, GetBoard.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "obtemTabuleiroResponse")
+    public JAXBElement<ObtemTabuleiroResponse> createObtemTabuleiroResponse(ObtemTabuleiroResponse value) {
+        return new JAXBElement<ObtemTabuleiroResponse>(_ObtemTabuleiroResponse_QNAME, ObtemTabuleiroResponse.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link GetBoardResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link TemPartida }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "getBoardResponse")
-    public JAXBElement<GetBoardResponse> createGetBoardResponse(GetBoardResponse value) {
-        return new JAXBElement<GetBoardResponse>(_GetBoardResponse_QNAME, GetBoardResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "temPartida")
+    public JAXBElement<TemPartida> createTemPartida(TemPartida value) {
+        return new JAXBElement<TemPartida>(_TemPartida_QNAME, TemPartida.class, null, value);
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link PlayerSignupResponse }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link EhMinhaVez }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "playerSignupResponse")
-    public JAXBElement<PlayerSignupResponse> createPlayerSignupResponse(PlayerSignupResponse value) {
-        return new JAXBElement<PlayerSignupResponse>(_PlayerSignupResponse_QNAME, PlayerSignupResponse.class, null, value);
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "ehMinhaVez")
+    public JAXBElement<EhMinhaVez> createEhMinhaVez(EhMinhaVez value) {
+        return new JAXBElement<EhMinhaVez>(_EhMinhaVez_QNAME, EhMinhaVez.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link ObtemTabuleiro }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "obtemTabuleiro")
+    public JAXBElement<ObtemTabuleiro> createObtemTabuleiro(ObtemTabuleiro value) {
+        return new JAXBElement<ObtemTabuleiro>(_ObtemTabuleiro_QNAME, ObtemTabuleiro.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link EncerraPartidaResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "encerraPartidaResponse")
+    public JAXBElement<EncerraPartidaResponse> createEncerraPartidaResponse(EncerraPartidaResponse value) {
+        return new JAXBElement<EncerraPartidaResponse>(_EncerraPartidaResponse_QNAME, EncerraPartidaResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link EhMinhaVezResponse }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "ehMinhaVezResponse")
+    public JAXBElement<EhMinhaVezResponse> createEhMinhaVezResponse(EhMinhaVezResponse value) {
+        return new JAXBElement<EhMinhaVezResponse>(_EhMinhaVezResponse_QNAME, EhMinhaVezResponse.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link MovePeca }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://server.chungtoi/", name = "movePeca")
+    public JAXBElement<MovePeca> createMovePeca(MovePeca value) {
+        return new JAXBElement<MovePeca>(_MovePeca_QNAME, MovePeca.class, null, value);
     }
 
 }

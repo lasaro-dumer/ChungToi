@@ -46,7 +46,7 @@ public class InteractiveClient {
         while (this.myUserId < 0) {
             System.out.println("What's your name?");
             this.name = scan.next();
-            this.myUserId = this.server.playerSignup(name);
+            this.myUserId = this.server.registraJogador(name);
             switch (myUserId) {
                 case -1:
                     System.out.println("Player already signed in, try again.");
@@ -60,7 +60,7 @@ public class InteractiveClient {
     private void play() throws Exception {
         System.out.println("Waiting match start...");
         waitMatchStart();
-        this.opponent = this.server.getOpponent(this.myUserId);
+        this.opponent = this.server.obtemOponente(this.myUserId);
         System.out.println(String.format("Your match is against %s. You are %s. And the best will win.", opponent, this.myColor.getName()));
         int matchState = 0;
         int errorCount = 0;
@@ -71,7 +71,7 @@ public class InteractiveClient {
             ­2 (erro: ainda não há 2 jogadores registrados na partida), ­1 (erro), 0 (não), 
             1 (sim), 2 (é o vencedor), 3 (é o perdedor), 4 (houve empate), 5 (vencedor por WO), 6 (perdedor por WO)
              */
-            matchState = this.server.isMyTurn(this.myUserId);
+            matchState = this.server.ehMinhaVez(this.myUserId);
             switch (matchState) {
                 case -2:
                     //no opponent yet
@@ -116,7 +116,7 @@ public class InteractiveClient {
 
             }
         } while (matchState <= 1);
-        int endRet = this.server.endMatch(this.myUserId);
+        int endRet = this.server.encerraPartida(this.myUserId);
         switch (endRet) {
             case -1:
                 System.out.println("Error ending match.");
@@ -134,7 +134,7 @@ public class InteractiveClient {
         this.inMatch = false;
         System.out.println("Please, wait while someone joins.");
         while (!this.inMatch) {
-            int hm = this.server.haveMatch(this.myUserId);
+            int hm = this.server.temPartida(this.myUserId);
             switch (hm) {
                 case -2:
                     throw new Exception("Player waiting timeout");
@@ -181,7 +181,7 @@ public class InteractiveClient {
                 orientation = null;
             }
             if (position != null && orientation != null) {
-                ret = this.server.placePiece(this.myUserId, position, orientation);
+                ret = this.server.posicionaPeca(this.myUserId, position, orientation);
                 if (ret == 1) {
                     this.placedPieces++;
                 }
@@ -219,7 +219,7 @@ public class InteractiveClient {
             }
 
             if (position != null && direction != null && movement != null && newOrientation != null) {
-                ret = this.server.movePiece(this.myUserId, position, direction, movement, newOrientation);
+                ret = this.server.movePeca(this.myUserId, position, direction, movement, newOrientation);
             }
         }
 
@@ -249,7 +249,7 @@ public class InteractiveClient {
     }
 
     private void printBoard() {
-        String board = this.server.getBoard(this.myUserId);
+        String board = this.server.obtemTabuleiro(this.myUserId);
         if (!board.equals("")) {
             char[] boardChars = board.toCharArray();
             board = String.format(" %s|%s|%s\n", boardChars[0], boardChars[1], boardChars[2]);

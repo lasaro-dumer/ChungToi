@@ -61,6 +61,31 @@ public class ChungToi {
     }
 
     /**
+    (usada para viabilizar o teste):
+    informa ao servidor o nome de um jogador (o primeiro da dupla), o identificador que o servidor deverá utilizar para este primeiro jogador, o nome de outro jogador (o segundo da dupla) e o respectivo identificador que o servidor deverá utilizar para este segundo jogador. Esta operação retorna sempre 0 e não haverá nenhuma inconsistência   nas   entradas   referente   às   operações   de   pré­registro   (ou   seja,   elas   serão   sempre consistentes).
+     * This method is used to allow a better testing approach. It receives the names of the players and also their names
+     *
+     * @param playerOneName the name of the first player
+     * @param playerOneId the desired id for the first player
+     * @param playerTwoName the name of the second player
+     * @param playerTwoId the desired id for the second player
+     * @return MUST be zero, otherwise an error happened
+     */
+    @WebMethod(operationName = "preRegistro")
+    public int preSignup(
+        @WebParam(name = "playerOneName") String playerOneName,
+        @WebParam(name = "playerOneId") int playerOneId,
+        @WebParam(name = "playerTwoName") String playerTwoName,
+        @WebParam(name = "playerTwoId") int playerTwoId) {
+        int ret = -1;
+        try {
+        }
+        catch (Exception e) {
+            this.log(e);
+        }
+        return ret;
+    }
+    /**
      * Sign up a new player. After signup the player remains in the application
      * registry while waits for a match and durigin the duration of it. When a
      * match ends, its players will be signed out
@@ -70,9 +95,9 @@ public class ChungToi {
      * in case it's already signed up OR -2 if the maxium number of players is
      * reached
      */
-    @WebMethod(operationName = "playerSignup")
-	public int playerSignup(
-		@WebParam(name = "name") String name) {
+    @WebMethod(operationName = "registraJogador")
+    public int playerSignup(
+        @WebParam(name = "name") String name) {
         int userId = -3;
         try{
             this.playerSem.acquire();
@@ -116,9 +141,9 @@ public class ChungToi {
      * @return 1 to error and 0 to success
      * @see #playerSignup(String name)
      */
-    @WebMethod(operationName = "endMatch")
-	public int endMatch(
-		@WebParam(name = "userId") int userId) {
+    @WebMethod(operationName = "encerraPartida")
+    public int endMatch(
+        @WebParam(name = "userId") int userId) {
         int ret = -1;
         try{
             String p = this.players.get(userId).toString();
@@ -151,9 +176,9 @@ public class ChungToi {
      * 2 have match and player plays as black pieces (E and e)
      * @see #playerSignup(String name)
      */
-    @WebMethod(operationName = "haveMatch")
-	public int haveMatch(
-		@WebParam(name = "userId") int userId) {
+    @WebMethod(operationName = "temPartida")
+    public int haveMatch(
+        @WebParam(name = "userId") int userId) {
         int ret = -1;
         try{
             Player player = null;
@@ -204,9 +229,9 @@ public class ChungToi {
      * @see #playerSignup(String name)
      * @see #haveMatch(int userId)
      */
-    @WebMethod(operationName = "isMyTurn")
-	public int isMyTurn(
-		@WebParam(name = "userId") int userId) {
+    @WebMethod(operationName = "ehMinhaVez")
+    public int isMyTurn(
+        @WebParam(name = "userId") int userId) {
         int ret = -1;
         try{
             this.waitQueueSem.acquire();
@@ -260,9 +285,9 @@ public class ChungToi {
      * @return an empty String in case of error OR the board
      * @see #playerSignup(String name)
      */
-    @WebMethod(operationName = "getBoard")
-	public String getBoard(
-		@WebParam(name = "userId") int userId) {
+    @WebMethod(operationName = "obtemTabuleiro")
+    public String getBoard(
+        @WebParam(name = "userId") int userId) {
         String ret = "";
         try{
             this.playerSem.acquire();
@@ -300,11 +325,11 @@ public class ChungToi {
      * @see #movePiece(int userId, int currentPosition, int direction, int
      * movement, int newOrientation)
      */
-    @WebMethod(operationName = "placePiece")
-	public int placePiece(
-		@WebParam(name = "userId") int userId,
-		@WebParam(name = "position") int position,
-		@WebParam(name = "orientation") int orientation) {
+    @WebMethod(operationName = "posicionaPeca")
+    public int placePiece(
+        @WebParam(name = "userId") int userId,
+        @WebParam(name = "position") int position,
+        @WebParam(name = "orientation") int orientation) {
         int ret = -1;
         try{
             this.waitQueueSem.acquire();
@@ -357,13 +382,13 @@ public class ChungToi {
      * @see #playerSignup(String name)
      * @see #placePiece(int userId, int position, int orientation)
      */
-    @WebMethod(operationName = "movePiece")
-	public int movePiece(
-		@WebParam(name = "userId") int userId,
-		@WebParam(name = "currentPosition") int currentPosition,
-		@WebParam(name = "direction") int direction,
-		@WebParam(name = "movement") int movement,
-		@WebParam(name = "newOrientation") int newOrientation) {
+    @WebMethod(operationName = "movePeca")
+    public int movePiece(
+        @WebParam(name = "userId") int userId,
+        @WebParam(name = "currentPosition") int currentPosition,
+        @WebParam(name = "direction") int direction,
+        @WebParam(name = "movement") int movement,
+        @WebParam(name = "newOrientation") int newOrientation) {
         int ret = 0;
         try {
             this.waitQueueSem.acquire();
@@ -400,9 +425,9 @@ public class ChungToi {
      * @see #playerSignup(String name)
      * @see #haveMatch(int userId)
      */
-    @WebMethod(operationName = "getOpponent")
-	public String getOpponent(
-		@WebParam(name = "name") int userId) {
+    @WebMethod(operationName = "obtemOponente")
+    public String getOpponent(
+        @WebParam(name = "name") int userId) {
         String ret = "";
         try{
             this.playerSem.acquire();

@@ -26,18 +26,27 @@ public interface ChungToi {
 
     /**
      * 
-     * @param name
+     * @param playerOneId
+     * @param playerTwoName
+     * @param playerTwoId
+     * @param playerOneName
      * @return
-     *     returns java.lang.String
+     *     returns int
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getOpponent", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.GetOpponent")
-    @ResponseWrapper(localName = "getOpponentResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.GetOpponentResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/getOpponentRequest", output = "http://server.chungtoi/ChungToi/getOpponentResponse")
-    public String getOpponent(
-        @WebParam(name = "name", targetNamespace = "")
-        int name);
+    @RequestWrapper(localName = "preRegistro", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PreRegistro")
+    @ResponseWrapper(localName = "preRegistroResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PreRegistroResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/preRegistroRequest", output = "http://server.chungtoi/ChungToi/preRegistroResponse")
+    public int preRegistro(
+        @WebParam(name = "playerOneName", targetNamespace = "")
+        String playerOneName,
+        @WebParam(name = "playerOneId", targetNamespace = "")
+        int playerOneId,
+        @WebParam(name = "playerTwoName", targetNamespace = "")
+        String playerTwoName,
+        @WebParam(name = "playerTwoId", targetNamespace = "")
+        int playerTwoId);
 
     /**
      * 
@@ -47,10 +56,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "playerSignup", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PlayerSignup")
-    @ResponseWrapper(localName = "playerSignupResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PlayerSignupResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/playerSignupRequest", output = "http://server.chungtoi/ChungToi/playerSignupResponse")
-    public int playerSignup(
+    @RequestWrapper(localName = "registraJogador", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.RegistraJogador")
+    @ResponseWrapper(localName = "registraJogadorResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.RegistraJogadorResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/registraJogadorRequest", output = "http://server.chungtoi/ChungToi/registraJogadorResponse")
+    public int registraJogador(
         @WebParam(name = "name", targetNamespace = "")
         String name);
 
@@ -62,10 +71,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "endMatch", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EndMatch")
-    @ResponseWrapper(localName = "endMatchResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EndMatchResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/endMatchRequest", output = "http://server.chungtoi/ChungToi/endMatchResponse")
-    public int endMatch(
+    @RequestWrapper(localName = "encerraPartida", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EncerraPartida")
+    @ResponseWrapper(localName = "encerraPartidaResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EncerraPartidaResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/encerraPartidaRequest", output = "http://server.chungtoi/ChungToi/encerraPartidaResponse")
+    public int encerraPartida(
         @WebParam(name = "userId", targetNamespace = "")
         int userId);
 
@@ -77,10 +86,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "haveMatch", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.HaveMatch")
-    @ResponseWrapper(localName = "haveMatchResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.HaveMatchResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/haveMatchRequest", output = "http://server.chungtoi/ChungToi/haveMatchResponse")
-    public int haveMatch(
+    @RequestWrapper(localName = "temPartida", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.TemPartida")
+    @ResponseWrapper(localName = "temPartidaResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.TemPartidaResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/temPartidaRequest", output = "http://server.chungtoi/ChungToi/temPartidaResponse")
+    public int temPartida(
         @WebParam(name = "userId", targetNamespace = "")
         int userId);
 
@@ -92,10 +101,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "isMyTurn", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.IsMyTurn")
-    @ResponseWrapper(localName = "isMyTurnResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.IsMyTurnResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/isMyTurnRequest", output = "http://server.chungtoi/ChungToi/isMyTurnResponse")
-    public int isMyTurn(
+    @RequestWrapper(localName = "ehMinhaVez", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EhMinhaVez")
+    @ResponseWrapper(localName = "ehMinhaVezResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.EhMinhaVezResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/ehMinhaVezRequest", output = "http://server.chungtoi/ChungToi/ehMinhaVezResponse")
+    public int ehMinhaVez(
         @WebParam(name = "userId", targetNamespace = "")
         int userId);
 
@@ -107,10 +116,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "getBoard", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.GetBoard")
-    @ResponseWrapper(localName = "getBoardResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.GetBoardResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/getBoardRequest", output = "http://server.chungtoi/ChungToi/getBoardResponse")
-    public String getBoard(
+    @RequestWrapper(localName = "obtemTabuleiro", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.ObtemTabuleiro")
+    @ResponseWrapper(localName = "obtemTabuleiroResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.ObtemTabuleiroResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/obtemTabuleiroRequest", output = "http://server.chungtoi/ChungToi/obtemTabuleiroResponse")
+    public String obtemTabuleiro(
         @WebParam(name = "userId", targetNamespace = "")
         int userId);
 
@@ -124,10 +133,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "placePiece", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PlacePiece")
-    @ResponseWrapper(localName = "placePieceResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PlacePieceResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/placePieceRequest", output = "http://server.chungtoi/ChungToi/placePieceResponse")
-    public int placePiece(
+    @RequestWrapper(localName = "posicionaPeca", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PosicionaPeca")
+    @ResponseWrapper(localName = "posicionaPecaResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.PosicionaPecaResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/posicionaPecaRequest", output = "http://server.chungtoi/ChungToi/posicionaPecaResponse")
+    public int posicionaPeca(
         @WebParam(name = "userId", targetNamespace = "")
         int userId,
         @WebParam(name = "position", targetNamespace = "")
@@ -147,10 +156,10 @@ public interface ChungToi {
      */
     @WebMethod
     @WebResult(targetNamespace = "")
-    @RequestWrapper(localName = "movePiece", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.MovePiece")
-    @ResponseWrapper(localName = "movePieceResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.MovePieceResponse")
-    @Action(input = "http://server.chungtoi/ChungToi/movePieceRequest", output = "http://server.chungtoi/ChungToi/movePieceResponse")
-    public int movePiece(
+    @RequestWrapper(localName = "movePeca", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.MovePeca")
+    @ResponseWrapper(localName = "movePecaResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.MovePecaResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/movePecaRequest", output = "http://server.chungtoi/ChungToi/movePecaResponse")
+    public int movePeca(
         @WebParam(name = "userId", targetNamespace = "")
         int userId,
         @WebParam(name = "currentPosition", targetNamespace = "")
@@ -161,5 +170,20 @@ public interface ChungToi {
         int movement,
         @WebParam(name = "newOrientation", targetNamespace = "")
         int newOrientation);
+
+    /**
+     * 
+     * @param name
+     * @return
+     *     returns java.lang.String
+     */
+    @WebMethod
+    @WebResult(targetNamespace = "")
+    @RequestWrapper(localName = "obtemOponente", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.ObtemOponente")
+    @ResponseWrapper(localName = "obtemOponenteResponse", targetNamespace = "http://server.chungtoi/", className = "chungtoi.client.proxy.ObtemOponenteResponse")
+    @Action(input = "http://server.chungtoi/ChungToi/obtemOponenteRequest", output = "http://server.chungtoi/ChungToi/obtemOponenteResponse")
+    public String obtemOponente(
+        @WebParam(name = "name", targetNamespace = "")
+        int name);
 
 }

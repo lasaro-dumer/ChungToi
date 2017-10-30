@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for movePiece complex type.
+ * <p>Java class for movePeca complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="movePiece">
+ * &lt;complexType name="movePeca">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -30,14 +30,14 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "movePiece", propOrder = {
+@XmlType(name = "movePeca", propOrder = {
     "userId",
     "currentPosition",
     "direction",
     "movement",
     "newOrientation"
 })
-public class MovePiece {
+public class MovePeca {
 
     protected int userId;
     protected int currentPosition;

@@ -3,20 +3,21 @@ package chungtoi.client.proxy;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for isMyTurn complex type.
+ * <p>Java class for preRegistroResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="isMyTurn">
+ * &lt;complexType name="preRegistroResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="userId" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -26,27 +27,28 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "isMyTurn", propOrder = {
-    "userId"
+@XmlType(name = "preRegistroResponse", propOrder = {
+    "_return"
 })
-public class IsMyTurn {
+public class PreRegistroResponse {
 
-    protected int userId;
+    @XmlElement(name = "return")
+    protected int _return;
 
     /**
-     * Gets the value of the userId property.
+     * Gets the value of the return property.
      * 
      */
-    public int getUserId() {
-        return userId;
+    public int getReturn() {
+        return _return;
     }
 
     /**
-     * Sets the value of the userId property.
+     * Sets the value of the return property.
      * 
      */
-    public void setUserId(int value) {
-        this.userId = value;
+    public void setReturn(int value) {
+        this._return = value;
     }
 
 }

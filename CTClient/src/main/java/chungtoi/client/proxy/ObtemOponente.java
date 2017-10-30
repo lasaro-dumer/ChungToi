@@ -3,21 +3,20 @@ package chungtoi.client.proxy;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for placePieceResponse complex type.
+ * <p>Java class for obtemOponente complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="placePieceResponse">
+ * &lt;complexType name="obtemOponente">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}int"/>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}int"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -27,28 +26,27 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "placePieceResponse", propOrder = {
-    "_return"
+@XmlType(name = "obtemOponente", propOrder = {
+    "name"
 })
-public class PlacePieceResponse {
+public class ObtemOponente {
 
-    @XmlElement(name = "return")
-    protected int _return;
+    protected int name;
 
     /**
-     * Gets the value of the return property.
+     * Gets the value of the name property.
      * 
      */
-    public int getReturn() {
-        return _return;
+    public int getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the return property.
+     * Sets the value of the name property.
      * 
      */
-    public void setReturn(int value) {
-        this._return = value;
+    public void setName(int value) {
+        this.name = value;
     }
 
 }

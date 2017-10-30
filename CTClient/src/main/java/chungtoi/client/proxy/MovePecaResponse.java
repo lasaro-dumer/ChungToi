@@ -8,12 +8,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for isMyTurnResponse complex type.
+ * <p>Java class for movePecaResponse complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="isMyTurnResponse">
+ * &lt;complexType name="movePecaResponse">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -27,10 +27,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "isMyTurnResponse", propOrder = {
+@XmlType(name = "movePecaResponse", propOrder = {
     "_return"
 })
-public class IsMyTurnResponse {
+public class MovePecaResponse {
 
     @XmlElement(name = "return")
     protected int _return;

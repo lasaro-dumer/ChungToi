@@ -7,12 +7,12 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for placePiece complex type.
+ * <p>Java class for posicionaPeca complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="placePiece">
+ * &lt;complexType name="posicionaPeca">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
@@ -28,12 +28,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "placePiece", propOrder = {
+@XmlType(name = "posicionaPeca", propOrder = {
     "userId",
     "position",
     "orientation"
 })
-public class PlacePiece {
+public class PosicionaPeca {
 
     protected int userId;
     protected int position;
