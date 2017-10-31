@@ -12,6 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -26,18 +27,22 @@ public class ChungToi {
 
     private final int MAX_MATCHES = 500;
     private final int MAX_PLAYERS = MAX_MATCHES * 2;
+    private Map<String, Integer> preSignupMap;
+    private Map<Integer, Integer> preSignupMatchMap;
     private Map<Integer, Player> players;
     private Integer nextUserId;
-    private Queue<Integer> waitingQueue;
+    private List<Integer> waitingList;
     private final Semaphore playerSem;
     private final Semaphore waitQueueSem;
     private SimpleDateFormat sdf;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public ChungToi() {
+        this.preSignupMap = new HashMap<>();
+        this.preSignupMatchMap = new HashMap<>();
         this.players = new HashMap<>();
         this.nextUserId = 1;
-        this.waitingQueue = new ArrayBlockingQueue(this.MAX_PLAYERS);
+        this.waitingList = new ArrayList(this.MAX_PLAYERS);
         this.playerSem = new Semaphore(1, true);
         this.waitQueueSem = new Semaphore(1, true);
         this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -79,6 +84,16 @@ public class ChungToi {
         @WebParam(name = "playerTwoId") int playerTwoId) {
         int ret = -1;
         try {
+            if(!this.preSignupMap.containsKey(playerOneName)){
+                this.preSignupMap.put(playerOneName, 0);
+            }
+            if(!this.preSignupMap.containsKey(playerTwoName)){
+                this.preSignupMap.put(playerTwoName, 0);
+            }
+            this.preSignupMap.put(playerOneName, playerOneId);
+            this.preSignupMap.put(playerTwoName, playerTwoId);
+            this.preSignupMatchMap.put(playerOneId, playerTwoId);
+            ret = 0;
         }
         catch (Exception e) {
             this.log(e);
@@ -107,21 +122,40 @@ public class ChungToi {
             if (this.players.size() == this.MAX_PLAYERS) {
                 return -2;
             }
-            userId = this.nextUserId;
-            this.nextUserId++;
+            if(this.preSignupMap.containsKey(name)){
+                userId = this.preSignupMap.get(name);
+            }
+            else{
+                userId = this.nextUserId;
+                this.nextUserId++;
+            }
             Player player = new Player(userId, name);
             this.players.put(userId, player);
             this.log(String.format("Player %s joined an has the user id '%s'", name, userId));
 
             this.waitQueueSem.acquire();
-            this.waitingQueue.add(userId);
-            if (this.waitingQueue.size() > 1) {
-                Integer whitePlayerId = this.waitingQueue.poll();
-                Integer blackPlayerId = this.waitingQueue.poll();
-                Match match = new Match(whitePlayerId, blackPlayerId);
-                this.players.get(whitePlayerId).setMatch(match);
-                this.players.get(blackPlayerId).setMatch(match);
-                this.log(String.format("Match started. Player %s against %s", this.players.get(whitePlayerId).getName(), this.players.get(blackPlayerId).getName()));
+            this.waitingList.add(userId);
+            if (this.waitingList.size() > 1) {
+                Integer whitePlayerId = null, blackPlayerId = null;
+                for (Map.Entry<Integer, Integer> preMatch : preSignupMatchMap.entrySet()) {
+                    Integer whiteCandidate = preMatch.getKey();
+                    Integer blackCandidate = preMatch.getValue();
+                    if(this.waitingList.contains(whiteCandidate) && this.waitingList.contains(blackCandidate)){
+                        whitePlayerId = whiteCandidate;
+                        blackPlayerId = blackCandidate;
+                        break;
+                    }
+                }
+                if(whitePlayerId != null && blackPlayerId != null){
+                    this.waitingList.remove(whitePlayerId);
+                    this.waitingList.remove(blackPlayerId);
+                    Player white = this.players.get(whitePlayerId);
+                    Player black = this.players.get(blackPlayerId);
+                    Match match = new Match(white.getUserId(), white.getName(), black.getUserId(), black.getName());
+                    white.setMatch(match);
+                    black.setMatch(match);
+                    this.log(String.format("Match started. Player %s against %s", white.getName(),black.getName()));
+                }
             }
             this.waitQueueSem.release();
             this.playerSem.release();
@@ -187,7 +221,7 @@ public class ChungToi {
                 player = this.players.get(userId);
                 if (player.isTimedOut()) {
                     this.waitQueueSem.acquire();
-                    this.waitingQueue.remove(userId);
+                    this.waitingList.remove(userId);
                     this.waitQueueSem.release();
                     this.players.remove(userId);
                     ret = -2;
@@ -236,7 +270,7 @@ public class ChungToi {
         try{
             this.waitQueueSem.acquire();
 
-            if (this.waitingQueue.contains(userId)) {
+            if (this.waitingList.contains(userId)) {
                 ret = -2;
             }
 
@@ -318,9 +352,11 @@ public class ChungToi {
      * 2 match ended, timeout<br>
      * 1 placed alright<br>
      * 0 invalid position<br>
-     * -1 invalid parameters<br>
+     * -1 player not found<br>
      * -2 match not started yet<br>
-     * -3 not player's turn<br>
+     * -3 invalid position and/or orientation parameters<br>
+     * -4 not player's turn<br>
+     * -5 placement phase already ended<br>
      * @see #playerSignup(String name)
      * @see #movePiece(int userId, int currentPosition, int direction, int
      * movement, int newOrientation)
@@ -330,18 +366,20 @@ public class ChungToi {
         @WebParam(name = "userId") int userId,
         @WebParam(name = "position") int position,
         @WebParam(name = "orientation") int orientation) {
-        int ret = -1;
+        int ret = -3; //The case where it's an invalid position and/or orientation almost never happen
         try{
             this.waitQueueSem.acquire();
-            if (this.waitingQueue.contains(userId)) {
+            if (this.waitingList.contains(userId)) {
                 ret = -2;
             }
             this.waitQueueSem.release();
 
-            if (ret == -1) {
+            if (ret == -3) {
                 this.playerSem.acquire();
                 if (this.players.containsKey(userId)) {
                     ret = this.players.get(userId).placePiece(position, orientation);
+                } else {
+                    ret = -1;
                 }
                 this.playerSem.release();
             }
@@ -376,9 +414,11 @@ public class ChungToi {
      * 2 match ended, probably timeout<br>
      * 1 moved alright<br>
      * 0 invalid move<br>
-     * -1 invalid parameters<br>
+     * -1 player not found<br>
      * -2 match not started yet<br>
-     * -3 not player's turn
+     * -3 invalid position and/or orientation parameters
+     * -4 not player's turn
+     * -5 not in the move phase yet
      * @see #playerSignup(String name)
      * @see #placePiece(int userId, int position, int orientation)
      */
@@ -392,7 +432,7 @@ public class ChungToi {
         int ret = 0;
         try {
             this.waitQueueSem.acquire();
-            if (this.waitingQueue.contains(userId)) {
+            if (this.waitingList.contains(userId)) {
                 ret = -2;
             }
             this.waitQueueSem.release();
@@ -406,6 +446,8 @@ public class ChungToi {
                     } else {
                         ret = 2;
                     }
+                } else {
+                    ret = -1;
                 }
                 this.playerSem.release();
             }
@@ -434,9 +476,9 @@ public class ChungToi {
             if (this.players.containsKey(userId)) {
                 Player player = this.players.get(userId);
                 if (player.isWhitePlayer()) {
-                    ret = this.players.get(player.getMatch().getBlackPlayerId()).getName();
+                    ret = player.getMatch().getBlackPlayerName();
                 } else if (player.isBlackPlayer(userId)) {
-                    ret = this.players.get(player.getMatch().getWhitePlayerId()).getName();
+                    ret = player.getMatch().getWhitePlayerName();
                 }
             }
             this.playerSem.release();
@@ -454,8 +496,8 @@ public class ChungToi {
             this.log("Checking timeouts..");
             this.playerSem.acquire();
             this.waitQueueSem.acquire();
-            for (Iterator it = this.waitingQueue.stream().iterator(); it.hasNext();) {
-                Player player = this.players.get((Integer) it.next());
+            for (Integer id : this.waitingList) {
+                Player player = this.players.get(id);
                 this.log(player.toString());
                 if (player.isTimedOut() || (player.getMatch() != null && !player.getMatch().isActive())) {
                     this.log("Removing " + player + " by timeout.");
@@ -501,7 +543,7 @@ public class ChungToi {
             this.waitQueueSem.acquire();
             sb.append("Server time: " + sdf.format(resultdate) + "\n");
             sb.append("Players online: " + this.players.size() + "\n");
-            sb.append("Player wainting a match: " + this.waitingQueue.size());
+            sb.append("Player wainting a match: " + this.waitingList.size());
             this.waitQueueSem.release();
             this.playerSem.release();
             ret = sb.toString();
@@ -517,6 +559,6 @@ public class ChungToi {
     }
 
     private void log(Exception ex){
-        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), ex.getStackTrace().toString()));
+        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), Arrays.toString(ex.getStackTrace())));
     }
 }

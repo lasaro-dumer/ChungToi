@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chungtwsclient;
+package chungtoi.client;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
+import chungtoi.client.proxy.ChungToi;
 
 /**
  *
@@ -18,22 +19,17 @@ import java.util.Scanner;
  */
 public class BatchClient {
 
-    static chungtoi.client.proxy.ChungToi port;
-    /**
-     * @param args the command line arguments
-     * @throws java.io.IOException
-     */
-    // public static void main(String[] args) throws IOException {
-    //     chungtwsclient.ChungTWS_Service service = new chungtwsclient.ChungTWS_Service();
-    //     port = service.getChungTWSPort();
-    //     executaTeste("ChungToi-0000");
-    // }
+    private ChungToi port;
 
-    private static int preRegistro(java.lang.String j1, int id1, java.lang.String j2, int id2) {
+    public BatchClient(ChungToi servicePort) {
+        this.port = servicePort;
+    }
+
+    private int preRegistro(java.lang.String j1, int id1, java.lang.String j2, int id2) {
         return port.preRegistro(j1, id1, j2, id2);
     }
 
-    private static void executaTeste(String rad) throws IOException {
+    public void executaTeste(String rad) throws IOException {
         String inFile = rad+".in";
         FileInputStream is = new FileInputStream(new File(inFile));
         System.setIn(is);
@@ -113,9 +109,8 @@ public class BatchClient {
         }
     }
 
-    private static void erro(String arq,int operacao) {
+    private void erro(String arq,int operacao) {
         System.err.println("Entrada invalida: erro na operacao "+operacao+" do arquivo "+arq);
         System.exit(1);
     }
-
 }

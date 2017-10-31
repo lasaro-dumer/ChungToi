@@ -22,6 +22,8 @@ public class Match {
 
     private Integer whitePlayerId;
     private Integer blackPlayerId;
+    private String whitePlayerName;
+    private String blackPlayerName;
     private MatchState state;
     private Long lastActionTime, endedTime;
     private boolean endedByWhite, endedByBlack;
@@ -29,9 +31,11 @@ public class Match {
     private int whitePiecesCount;
     private int blackPiecesCount;
 
-    public Match(Integer whitePlayerId, Integer blackPlayerId) {
+    public Match(Integer whitePlayerId, String whiteName, Integer blackPlayerId, String blackName) {
         this.whitePlayerId = whitePlayerId;
+        this.whitePlayerName = whiteName;
         this.blackPlayerId = blackPlayerId;
+        this.blackPlayerName = blackName;
         this.state = MatchState.WHITE_TURN;
         this.lastActionTime = System.currentTimeMillis();
         this.endedByWhite = false;
@@ -49,8 +53,16 @@ public class Match {
         return this.whitePlayerId;
     }
 
+    public String getWhitePlayerName(){
+        return this.whitePlayerName;
+    }
+
     public Integer getBlackPlayerId() {
         return this.blackPlayerId;
+    }
+
+    public String getBlackPlayerName(){
+        return this.blackPlayerName;
     }
 
     public boolean isWhitePlayer(int userId) {
@@ -115,16 +127,23 @@ public class Match {
     }
 
     public int placePiece(int userId, int position, int orientation) {
-        int ret = -1;
+        int ret = -3;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
         if ((whitePlayer && this.state != MatchState.WHITE_TURN)
                 || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
-            return -3;
+            return -4;
         }
 
-        if (position >= 0 && position <= 8 && (this.board[position] == '.')
-                && ((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3))) {
+        if((whitePlayer && this.whitePiecesCount == 3) || (blackPlayer && this.blackPiecesCount == 3)){
+            return -5;
+        }
+
+        if(!(position >= 0 && position <= 8)
+            || (orientation != 0 && orientation != 1))
+            return ret;//-3
+
+        if (this.board[position] == '.') {
             char piece = getPieceChar(whitePlayer, blackPlayer, orientation);
             if (piece != '.') {
                 this.board[position] = piece;
@@ -146,17 +165,22 @@ public class Match {
     }
 
     public int movePiece(int userId, int currentPosition, int direction, int movement, int newOrientation) {
-        int ret = -1;
+        int ret = -3;
         Movement mov = Movement.INVALID;
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
 
         if ((whitePlayer && this.state != MatchState.WHITE_TURN)
                 || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
-            return -3;
+            return -4;
         }
+
+        if((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3)){
+            return -5;
+        }
+
         System.out.println("is player turn " + userId);
-        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.') && (newOrientation != 0 || newOrientation != 1)) {
+        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.') && (newOrientation == 0 || newOrientation == 1)) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
 

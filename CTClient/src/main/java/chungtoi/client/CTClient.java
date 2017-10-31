@@ -17,16 +17,20 @@ import java.util.Scanner;
  */
 public class CTClient {
     public static void main(String[] args) {
-        // if (args.length != 1) {
-        //     System.out.println("Usage: java CTClient <server_name>");
-        //     System.exit(1);
-        // }
         try {
             ChungToiWS service = new ChungToiWS();
             ChungToi chungToi = service.getChungToiPort();
 
-            InteractiveClient client = new InteractiveClient(chungToi);
-            client.startGame();
+            if(args.length == 0){
+                InteractiveClient client = new InteractiveClient(chungToi);
+                client.startGame();
+            }
+            else{
+                for (int i = 0; i < args.length; i++) {
+                    BatchClient bc = new BatchClient(chungToi);
+                    bc.executaTeste(args[i]);
+                }
+            }
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage() + "\n" + e.getStackTrace().toString());
         }
