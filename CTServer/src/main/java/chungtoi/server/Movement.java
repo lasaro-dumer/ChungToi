@@ -23,6 +23,8 @@ public enum Movement {
     private int code;
     private boolean perpendicular;
     private int factor;
+    public static final int PERPENDICULAR_VALUE = 0;
+    public static final int DIAGONAL_VALUE = 1;
 
     private Movement(int code, boolean perpendicular, int factor) {
         this.code = code;
@@ -32,6 +34,10 @@ public enum Movement {
 
     public int getNewPosition() {
         return this.newPosition;
+    }
+
+    public int getCode(){
+        return this.code;
     }
 
     public static Movement valueOfCode(int code) {
@@ -51,22 +57,17 @@ public enum Movement {
         return result;
     }
 
-    private static void debugMovement(Movement ret,int currentPosition, int movement){
-        System.out.println("Invalid: " + ret + "("+currentPosition+","+movement+")");
-    }
-
     public static Movement processMovement(int currentPosition, int currOrientation, int direction, int movement) {
         Movement ret = Movement.valueOfCode(direction);
         if (ret != INVALID) {
             boolean moveIsValid = (movement >= 0 && movement <= 2) && !(ret == STILL && movement != 0) && !(ret != STILL && movement == 0);
-            System.out.println("ret.perpendicular: " + ret.perpendicular + " currOrientation: " + currOrientation + " moveIsValid:"+moveIsValid);
-            if (ret.perpendicular && (currOrientation == 0) && moveIsValid) {
+
+            if (ret.perpendicular && (currOrientation == Movement.PERPENDICULAR_VALUE) && moveIsValid) {
                 switch (ret) {
                     case UP:
                         if (!((movement == 2) && (currentPosition == 6 || currentPosition == 7 || currentPosition == 8))
                                 && !(movement == 1 && (currentPosition == 3 || currentPosition == 4 || currentPosition == 5
                                 || currentPosition == 6 || currentPosition == 7 || currentPosition == 8))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -74,7 +75,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 2 || currentPosition == 5 || currentPosition == 8))
                                 && !(movement == 1 && (currentPosition == 1 || currentPosition == 2 || currentPosition == 4
                                 || currentPosition == 5 || currentPosition == 7 || currentPosition == 8))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -85,7 +85,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 0 || currentPosition == 3 || currentPosition == 6))
                                 && !(movement == 1 && (currentPosition == 0 || currentPosition == 1 || currentPosition == 3
                                 || currentPosition == 4 || currentPosition == 6 || currentPosition == 7))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -93,7 +92,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 0 || currentPosition == 1 || currentPosition == 2))
                                 && !(movement == 1 && (currentPosition == 0 || currentPosition == 1 || currentPosition == 2
                                 || currentPosition == 3 || currentPosition == 4 || currentPosition == 5))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -101,13 +99,12 @@ public enum Movement {
                         ret = INVALID;
                         break;
                 }
-            } else if (!ret.perpendicular && (currOrientation == 1) && moveIsValid) {
+            } else if (!ret.perpendicular && (currOrientation == Movement.DIAGONAL_VALUE) && moveIsValid) {
                 switch (ret) {
                     case UP_LEFT:
                         if (!((movement == 2) && (currentPosition == 8))
                                 && !(movement == 1 && (currentPosition == 4 || currentPosition == 5
                                 || currentPosition == 7 || currentPosition == 8))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -115,7 +112,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 6))
                                 && !(movement == 1 && (currentPosition == 3 || currentPosition == 4
                                 || currentPosition == 6 || currentPosition == 7))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -125,7 +121,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 2))
                                 && !(movement == 1 && (currentPosition == 1 || currentPosition == 2
                                 || currentPosition == 4 || currentPosition == 5))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
@@ -133,7 +128,6 @@ public enum Movement {
                         if (!((movement == 2) && (currentPosition == 0))
                                 && !(movement == 1 && (currentPosition == 0 || currentPosition == 1
                                 || currentPosition == 3 || currentPosition == 4))) {
-                            debugMovement(ret, currentPosition, movement);
                             ret = INVALID;
                         }
                         break;
