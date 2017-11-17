@@ -22,7 +22,7 @@ import javax.jws.WebParam;
  *
  * @author lasaro
  */
- @WebService(serviceName = "ChungToiWS")
+@WebService(serviceName = "ChungToiWS")
 public class ChungToi {
 
     private final int MAX_MATCHES = 500;
@@ -47,28 +47,20 @@ public class ChungToi {
         this.waitQueueSem = new Semaphore(1, true);
         this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-        ChungToi chungToi = this;
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    int removedPlayers = chungToi.checkPlayersTimeouts();
-                    if (removedPlayers > 0) {
-                        chungToi.log(String.format("Removed %s players", removedPlayers));
-                    }
-                    chungToi.log(chungToi.printStatus());
-                } catch (Exception e) {
-                    chungToi.log(e);
-                }
-            }
-        }, 0, 1, TimeUnit.SECONDS);
+        ChungToiCleaner cleaner = new ChungToiCleaner(this);
+        exec.scheduleAtFixedRate(cleaner, 0, 1, TimeUnit.SECONDS);
     }
 
     /**
-    (usada para viabilizar o teste):
-    informa ao servidor o nome de um jogador (o primeiro da dupla), o identificador que o servidor deverá utilizar para este primeiro jogador, o nome de outro jogador (o segundo da dupla) e o respectivo identificador que o servidor deverá utilizar para este segundo jogador. Esta operação retorna sempre 0 e não haverá nenhuma inconsistência   nas   entradas   referente   às   operações   de   pré­registro   (ou   seja,   elas   serão   sempre consistentes).
-     * This method is used to allow a better testing approach. It receives the names of the players and also their names
+     * (usada para viabilizar o teste): informa ao servidor o nome de um
+     * jogador (o primeiro da dupla), o identificador que o servidor deverá utilizar para este primeiro
+     * jogador, o nome de outro jogador (o segundo da dupla) e o respectivo identificador que o servidor
+     * deverá utilizar para este segundo jogador. Esta operação retorna sempre 0 e não haverá nenhuma
+     * inconsistência   nas   entradas   referente   às   operações   de  
+     * pré­registro   (ou   seja,   elas   serão   sempre consistentes). This
+     * method is used to allow a better testing approach. It receives the names
+     * of the players and also their names
      *
      * @param playerOneName the name of the first player
      * @param playerOneId the desired id for the first player
@@ -78,28 +70,28 @@ public class ChungToi {
      */
     @WebMethod(operationName = "preRegistro")
     public int preSignup(
-        @WebParam(name = "playerOneName") String playerOneName,
-        @WebParam(name = "playerOneId") int playerOneId,
-        @WebParam(name = "playerTwoName") String playerTwoName,
-        @WebParam(name = "playerTwoId") int playerTwoId) {
+            @WebParam(name = "playerOneName") String playerOneName,
+            @WebParam(name = "playerOneId") int playerOneId,
+            @WebParam(name = "playerTwoName") String playerTwoName,
+            @WebParam(name = "playerTwoId") int playerTwoId) {
         int ret = -1;
         try {
-            if(!this.preSignupMap.containsKey(playerOneName)){
+            if (!this.preSignupMap.containsKey(playerOneName)) {
                 this.preSignupMap.put(playerOneName, 0);
             }
-            if(!this.preSignupMap.containsKey(playerTwoName)){
+            if (!this.preSignupMap.containsKey(playerTwoName)) {
                 this.preSignupMap.put(playerTwoName, 0);
             }
             this.preSignupMap.put(playerOneName, playerOneId);
             this.preSignupMap.put(playerTwoName, playerTwoId);
             this.preSignupMatchMap.put(playerOneId, playerTwoId);
             ret = 0;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
         }
         return ret;
     }
+
     /**
      * Sign up a new player. After signup the player remains in the application
      * registry while waits for a match and durigin the duration of it. When a
@@ -112,20 +104,20 @@ public class ChungToi {
      */
     @WebMethod(operationName = "registraJogador")
     public int playerSignup(
-        @WebParam(name = "name") String name) {
+            @WebParam(name = "name") String name) {
         int userId = -3;
-        try{
-            this.playerSem.acquire();
-            if (this.players.values().stream().filter(p -> p.getName().equals(name)).count() > 0) {
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
+            while(!havePlayerPermit)
+                havePlayerPermit = this.playerSem.tryAcquire();
+            if (this.players.values().stream().filter(p -> p.getName().equals(name)).count() > 0)
                 return -1;
-            }
-            if (this.players.size() == this.MAX_PLAYERS) {
+            if (this.players.size() == this.MAX_PLAYERS)
                 return -2;
-            }
-            if(this.preSignupMap.containsKey(name)){
+            if (this.preSignupMap.containsKey(name)) {
                 userId = this.preSignupMap.get(name);
-            }
-            else{
+            } else {
                 userId = this.nextUserId;
                 this.nextUserId++;
             }
@@ -133,20 +125,21 @@ public class ChungToi {
             this.players.put(userId, player);
             this.log(String.format("Player %s joined an has the user id '%s'", name, userId));
 
-            this.waitQueueSem.acquire();
+            while(!haveWaitQueuePermit)
+                haveWaitQueuePermit=this.waitQueueSem.tryAcquire();
             this.waitingList.add(userId);
             if (this.waitingList.size() > 1) {
                 Integer whitePlayerId = null, blackPlayerId = null;
                 for (Map.Entry<Integer, Integer> preMatch : preSignupMatchMap.entrySet()) {
                     Integer whiteCandidate = preMatch.getKey();
                     Integer blackCandidate = preMatch.getValue();
-                    if(this.waitingList.contains(whiteCandidate) && this.waitingList.contains(blackCandidate)){
+                    if (this.waitingList.contains(whiteCandidate) && this.waitingList.contains(blackCandidate)) {
                         whitePlayerId = whiteCandidate;
                         blackPlayerId = blackCandidate;
                         break;
                     }
                 }
-                if(whitePlayerId != null && blackPlayerId != null){
+                if (whitePlayerId != null && blackPlayerId != null) {
                     this.waitingList.remove(whitePlayerId);
                     this.waitingList.remove(blackPlayerId);
                     Player white = this.players.get(whitePlayerId);
@@ -154,14 +147,19 @@ public class ChungToi {
                     Match match = new Match(white.getUserId(), white.getName(), black.getUserId(), black.getName());
                     white.setMatch(match);
                     black.setMatch(match);
-                    this.log(String.format("Match started. Player %s against %s", white.getName(),black.getName()));
+                    this.log(String.format("Match started. Player %s against %s", white.getName(), black.getName()));
                 }
             }
             this.waitQueueSem.release();
+            haveWaitQueuePermit = false;
             this.playerSem.release();
-        }
-        catch (Exception e){
+            havePlayerPermit = false;
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return userId;
     }
@@ -177,22 +175,27 @@ public class ChungToi {
      */
     @WebMethod(operationName = "encerraPartida")
     public int endMatch(
-        @WebParam(name = "userId") int userId) {
+            @WebParam(name = "userId") int userId) {
         int ret = -1;
-        try{
+        boolean havePlayerPermit = false;
+        try {
             String p = this.players.get(userId).toString();
             this.log(p + " logging out...");
-            this.playerSem.acquire();
+            while(!havePlayerPermit)
+                havePlayerPermit=this.playerSem.tryAcquire();
             if (this.players.containsKey(userId)) {
                 this.players.get(userId).getMatch().endMatch(userId);
                 this.players.remove(userId);
                 ret = 0;
             }
             this.playerSem.release();
+            havePlayerPermit = false;
             this.log(p + " logged out");
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+
         }
         return ret;
     }
@@ -212,36 +215,46 @@ public class ChungToi {
      */
     @WebMethod(operationName = "temPartida")
     public int haveMatch(
-        @WebParam(name = "userId") int userId) {
+            @WebParam(name = "userId") int userId) {
         int ret = -1;
-        try{
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
             Player player = null;
-            this.playerSem.acquire();
+            while (!havePlayerPermit)
+                havePlayerPermit = this.playerSem.tryAcquire();
             if (this.players.containsKey(userId)) {
                 player = this.players.get(userId);
                 if (player.isTimedOut()) {
-                    this.waitQueueSem.acquire();
-                    this.waitingList.remove(userId);
+                    while (!haveWaitQueuePermit)
+                        haveWaitQueuePermit = this.waitQueueSem.tryAcquire();
+                    if (this.waitingList.contains(userId))
+                        this.waitingList.remove(userId);
                     this.waitQueueSem.release();
+                    haveWaitQueuePermit=false;
                     this.players.remove(userId);
                     ret = -2;
                     player = null;
                 }
             }
-            this.playerSem.release();
 
             if (player != null) {
-                if (player.getMatch() == null) {
+                if (player.getMatch() == null)
                     ret = 0;
-                } else if (player.getMatch().isWhitePlayer(userId)) {
+                else if (player.getMatch().isWhitePlayer(userId))
                     ret = 1;
-                } else if (player.getMatch().isBlackPlayer(userId)) {
+                else if (player.getMatch().isBlackPlayer(userId))
                     ret = 2;
-                }
             }
-        }
-        catch(Exception e){
+
+            this.playerSem.release();
+            havePlayerPermit =false;
+        } catch (Exception e) {
             this.log(e);
+            if (havePlayerPermit)
+                this.playerSem.release();
+            if (haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return ret;
     }
@@ -265,27 +278,33 @@ public class ChungToi {
      */
     @WebMethod(operationName = "ehMinhaVez")
     public int isMyTurn(
-        @WebParam(name = "userId") int userId) {
+            @WebParam(name = "userId") int userId) {
         int ret = -1;
-        try{
-            this.waitQueueSem.acquire();
-
-            if (this.waitingList.contains(userId)) {
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
+            while (!haveWaitQueuePermit)
+                haveWaitQueuePermit = this.waitQueueSem.tryAcquire();
+            if (this.waitingList.contains(userId))
                 ret = -2;
-            }
 
             this.waitQueueSem.release();
+            haveWaitQueuePermit=false;
 
             if (ret == -1) {
-            this.playerSem.acquire();
-            if (this.players.containsKey(userId)) {
-                ret = this.players.get(userId).isMyTurn();
+                while (!havePlayerPermit)
+                    havePlayerPermit = this.playerSem.tryAcquire();
+                if (this.players.containsKey(userId))
+                    ret = this.players.get(userId).isMyTurn();
+                this.playerSem.release();
+                havePlayerPermit=false;
             }
-            this.playerSem.release();
-        }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return ret;
     }
@@ -321,17 +340,20 @@ public class ChungToi {
      */
     @WebMethod(operationName = "obtemTabuleiro")
     public String getBoard(
-        @WebParam(name = "userId") int userId) {
+            @WebParam(name = "userId") int userId) {
         String ret = "";
-        try{
-            this.playerSem.acquire();
-            if (this.players.containsKey(userId)) {
+        boolean havePlayerPermit = false;
+        try {
+            while(!havePlayerPermit)
+                havePlayerPermit=this.playerSem.tryAcquire();
+            if (this.players.containsKey(userId))
                 ret = this.players.get(userId).getBoard();
-            }
             this.playerSem.release();
-        }
-        catch (Exception e) {
+            havePlayerPermit=false;
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
         }
         return ret;
     }
@@ -363,29 +385,34 @@ public class ChungToi {
      */
     @WebMethod(operationName = "posicionaPeca")
     public int placePiece(
-        @WebParam(name = "userId") int userId,
-        @WebParam(name = "position") int position,
-        @WebParam(name = "orientation") int orientation) {
+            @WebParam(name = "userId") int userId,
+            @WebParam(name = "position") int position,
+            @WebParam(name = "orientation") int orientation) {
         int ret = -3; //The case where it's an invalid position and/or orientation almost never happen
-        try{
-            this.waitQueueSem.acquire();
-            if (this.waitingList.contains(userId)) {
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
+            while(!haveWaitQueuePermit)
+                haveWaitQueuePermit=this.waitQueueSem.tryAcquire();
+            if (this.waitingList.contains(userId))
                 ret = -2;
-            }
             this.waitQueueSem.release();
+            haveWaitQueuePermit=false;
 
             if (ret == -3) {
-                this.playerSem.acquire();
-                if (this.players.containsKey(userId)) {
+                while(!havePlayerPermit)
+                    havePlayerPermit=this.playerSem.tryAcquire();
+                if (this.players.containsKey(userId))
                     ret = this.players.get(userId).placePiece(position, orientation);
-                } else {
+                else
                     ret = -1;
-                }
                 this.playerSem.release();
+                havePlayerPermit=false;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return ret;
     }
@@ -416,44 +443,51 @@ public class ChungToi {
      * 0 invalid move<br>
      * -1 player not found<br>
      * -2 match not started yet<br>
-     * -3 invalid position and/or orientation parameters
-     * -4 not player's turn
-     * -5 not in the move phase yet
+     * -3 invalid position and/or orientation parameters<br>
+     * -4 not player's turn<br>
+     * -5 not in the move phase yet<br>
      * @see #playerSignup(String name)
      * @see #placePiece(int userId, int position, int orientation)
      */
     @WebMethod(operationName = "movePeca")
     public int movePiece(
-        @WebParam(name = "userId") int userId,
-        @WebParam(name = "currentPosition") int currentPosition,
-        @WebParam(name = "direction") int direction,
-        @WebParam(name = "movement") int movement,
-        @WebParam(name = "newOrientation") int newOrientation) {
+            @WebParam(name = "userId") int userId,
+            @WebParam(name = "currentPosition") int currentPosition,
+            @WebParam(name = "direction") int direction,
+            @WebParam(name = "movement") int movement,
+            @WebParam(name = "newOrientation") int newOrientation) {
         int ret = 0;
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
         try {
-            this.waitQueueSem.acquire();
-            if (this.waitingList.contains(userId)) {
+            while(!haveWaitQueuePermit)
+                haveWaitQueuePermit= this.waitQueueSem.tryAcquire();
+            if (this.waitingList.contains(userId))
                 ret = -2;
-            }
             this.waitQueueSem.release();
+            haveWaitQueuePermit = false;
 
             if (ret == 0) {
-                this.playerSem.acquire();
+                while(!havePlayerPermit)
+                    havePlayerPermit=this.playerSem.tryAcquire();
                 if (this.players.containsKey(userId)) {
                     Player player = this.players.get(userId);
-                    if (player.getMatch().isActive()) {
+                    if (player.getMatch().isActive())
                         ret = player.movePiece(currentPosition, direction, movement, newOrientation);
-                    } else {
+                    else
                         ret = 2;
-                    }
                 } else {
                     ret = -1;
                 }
                 this.playerSem.release();
+                havePlayerPermit = false;
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return ret;
     }
@@ -469,33 +503,40 @@ public class ChungToi {
      */
     @WebMethod(operationName = "obtemOponente")
     public String getOpponent(
-        @WebParam(name = "name") int userId) {
+            @WebParam(name = "name") int userId) {
         String ret = "";
-        try{
-            this.playerSem.acquire();
+        boolean havePlayerPermit = false;
+        try {
+            while(!havePlayerPermit)
+                havePlayerPermit= this.playerSem.tryAcquire();
             if (this.players.containsKey(userId)) {
                 Player player = this.players.get(userId);
-                if (player.isWhitePlayer()) {
+                if (player.isWhitePlayer())
                     ret = player.getMatch().getBlackPlayerName();
-                } else if (player.isBlackPlayer(userId)) {
+                else if (player.isBlackPlayer(userId))
                     ret = player.getMatch().getWhitePlayerName();
-                }
             }
             this.playerSem.release();
-        }
-        catch (Exception e) {
+            havePlayerPermit = false;
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
         }
         return ret;
     }
 
     @SuppressWarnings("rawtypes")
-    private int checkPlayersTimeouts() {
+    public int checkPlayersTimeouts() {
         int removed = 0;
-        try{
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
             this.log("Checking timeouts..");
-            this.playerSem.acquire();
-            this.waitQueueSem.acquire();
+            while(!havePlayerPermit)
+                havePlayerPermit = this.playerSem.tryAcquire();
+            while(!haveWaitQueuePermit)
+                haveWaitQueuePermit = this.waitQueueSem.tryAcquire();
             for (Integer id : this.waitingList) {
                 Player player = this.players.get(id);
                 this.log(player.toString());
@@ -512,9 +553,8 @@ public class ChungToi {
                 if (player.getMatch() != null && !player.getMatch().isActive()) {
                     Long wt = (System.currentTimeMillis() - player.getMatch().getTimeSinceEnded()) / 1000;
                     //wait 10 seconds before forcing the player out
-                    if ((wt >= 10)) {
+                    if (wt >= 10)
                         toRemove.add(userId);
-                    }
                 }
             }
             for (Integer userId : toRemove) {
@@ -522,43 +562,61 @@ public class ChungToi {
                 this.players.remove(userId);
                 removed++;
             }
+
             this.waitQueueSem.release();
+            haveWaitQueuePermit = false;
             this.playerSem.release();
+            havePlayerPermit = false;
+
             this.log("ended checking timeouts");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return removed;
     }
 
-    private String printStatus() {
+    public String printStatus() {
         String ret = "";
-        try{
+        boolean havePlayerPermit = false;
+        boolean haveWaitQueuePermit = false;
+        try {
             StringBuilder sb = new StringBuilder();
             long currMilliseconds = System.currentTimeMillis();
             Date resultdate = new Date(currMilliseconds);
 
-            this.playerSem.acquire();
-            this.waitQueueSem.acquire();
+            while(!havePlayerPermit)
+                havePlayerPermit = this.playerSem.tryAcquire();
+            while(!haveWaitQueuePermit)
+                haveWaitQueuePermit = this.waitQueueSem.tryAcquire();
             sb.append("Server time: " + sdf.format(resultdate) + "\n");
             sb.append("Players online: " + this.players.size() + "\n");
             sb.append("Player wainting a match: " + this.waitingList.size());
+
             this.waitQueueSem.release();
+            haveWaitQueuePermit = false;
             this.playerSem.release();
+            havePlayerPermit = false;
+
             ret = sb.toString();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.log(e);
+            if(havePlayerPermit)
+                this.playerSem.release();
+            if(haveWaitQueuePermit)
+                this.waitQueueSem.release();
         }
         return ret;
     }
 
-    private void log(String message){
+    public void log(String message) {
         System.out.println(String.format("[INFO] %s", message));
     }
 
-    private void log(Exception ex){
-        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), Arrays.toString(ex.getStackTrace())));
+    public void log(Exception ex) {
+        System.out.println(String.format("[ERROR] %s\n%s", ex.getMessage(), Arrays.toString(ex.getStackTrace()).replace("), ", "),\n")));
     }
 }

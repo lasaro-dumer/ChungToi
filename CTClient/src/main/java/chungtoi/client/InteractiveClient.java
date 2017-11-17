@@ -7,8 +7,7 @@ package chungtoi.client;
 
 import chungtoi.client.proxy.ChungToiWS;
 import chungtoi.client.proxy.ChungToi;
-import java.rmi.Naming;
-import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -36,7 +35,7 @@ public class InteractiveClient {
             this.play();
         }
         catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage() + "\n" + e.getStackTrace().toString());
+            System.out.println(String.format("[ERROR] %s\n%s", e.getMessage(), Arrays.toString(e.getStackTrace()).replace(", ",",\n")));
         }
     }
 

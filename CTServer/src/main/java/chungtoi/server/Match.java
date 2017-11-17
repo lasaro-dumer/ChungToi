@@ -178,9 +178,11 @@ public class Match {
         if((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3)){
             return -5;
         }
+        if((this.board[currentPosition] != '.'))
+            return 0;
 
         System.out.println("is player turn " + userId);
-        if (currentPosition >= 0 && currentPosition <= 8 && (this.board[currentPosition] != '.') && (newOrientation == 0 || newOrientation == 1)) {
+        if (currentPosition >= 0 && currentPosition <= 8 && (newOrientation == 0 || newOrientation == 1)) {
             char piece = this.board[currentPosition];
             int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
 
