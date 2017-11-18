@@ -54,7 +54,7 @@ public class Player {
 
     public String getBoard() {
         if (this.match != null) {
-            return this.match.getBoard(this.userId);
+            return this.match.getBoard();
         } else {
             return "";
         }

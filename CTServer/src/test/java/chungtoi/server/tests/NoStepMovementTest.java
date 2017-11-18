@@ -45,7 +45,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght UP_LEFT movement from position 0 through 8
+     * Test no move length UP_LEFT movement from position 0 through 8
      */
     public void test_No_UP_LEFT_from_0_to_8() {
         int direction = Movement.UP_LEFT.getCode();
@@ -70,7 +70,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght UP movement from position 0 through 8
+     * Test no move length UP movement from position 0 through 8
      */
     public void test_No_UP_from_0_to_8() {
         int direction = Movement.UP.getCode();
@@ -95,7 +95,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght UP_RIGHT movement from position 0 through 8
+     * Test no move length UP_RIGHT movement from position 0 through 8
      */
     public void test_No_UP_RIGHT_from_0_to_8() {
         int direction = Movement.UP_RIGHT.getCode();
@@ -120,7 +120,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght LEFT movement from position 0 through 8
+     * Test no move length LEFT movement from position 0 through 8
      */
     public void test_No_LEFT_from_0_to_8() {
         int direction = Movement.LEFT.getCode();
@@ -145,7 +145,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght STILL movement from position 0 through 8
+     * Test no move length STILL movement from position 0 through 8
      */
     public void test_No_STILL_from_0_to_8() {
         int direction = Movement.STILL.getCode();
@@ -207,7 +207,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght RIGHT movement from position 0 through 8
+     * Test no move length RIGHT movement from position 0 through 8
      */
     public void test_No_RIGHT_from_0_to_8() {
         int direction = Movement.RIGHT.getCode();
@@ -232,7 +232,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght DOWN_LEFT movement from position 0 through 8
+     * Test no move length DOWN_LEFT movement from position 0 through 8
      */
     public void test_No_DOWN_LEFT_from_0_to_8() {
         int direction = Movement.DOWN_LEFT.getCode();
@@ -257,7 +257,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght DOWN movement from position 0 through 8
+     * Test no move length DOWN movement from position 0 through 8
      */
     public void test_No_DOWN_from_0_to_8() {
         int direction = Movement.DOWN.getCode();
@@ -282,7 +282,7 @@ public class NoStepMovementTest extends TestCase{
     }
 
     /**
-     * Test no move lenght DOWN_RIGHT movement from position 0 through 8
+     * Test no move length DOWN_RIGHT movement from position 0 through 8
      */
     public void test_No_DOWN_RIGHT_from_0_to_8() {
         int direction = Movement.DOWN_RIGHT.getCode();

@@ -205,7 +205,7 @@ public class InteractiveClient {
                 System.out.println("7 - down");
                 System.out.println("8 - down right");
                 direction = scan.nextInt();
-                System.out.println("What is the lenght of the movement?");
+                System.out.println("What is the length of the movement?");
                 movement = scan.nextInt();
                 System.out.println("What is the new orientation of the piece?");
                 System.out.println("0 - perpendicular\n1 - diagonal");

@@ -118,12 +118,9 @@ public class Match {
         return this.endedTime == null;
     }
 
-    public String getBoard(int userId) {
-        String ret = "";
-        for (int i = 0; i < board.length; i++) {
-            ret += board[i];
-        }
-        return ret;
+    public String getBoard() {
+        String boardString = String.valueOf(this.board);
+        return boardString;
     }
 
     public int placePiece(int userId, int position, int orientation) {
@@ -178,7 +175,7 @@ public class Match {
         if((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3)){
             return -5;
         }
-        if((this.board[currentPosition] != '.'))
+        if((this.board[currentPosition] == '.'))
             return 0;
 
         System.out.println("is player turn " + userId);
@@ -233,27 +230,31 @@ public class Match {
     }
 
     private void checkWinConditions() {
-        char[] tb = new char[this.board.length];
-        for (int i = 0; i < tb.length; i++) {
-            tb[i] = (new String(this.board, i, 1)).toUpperCase().toCharArray()[0];
-        }
-
+        char[] tb = this.getBoard().toUpperCase().toCharArray();
+        // 0	1	2
+        // 3	4	5
+        // 6	7	8
+        // 0	3	6
+        // 1	4	7
+        // 2	5	8
+        // 0	4	8
+        // 6	4	2
         char winP = '.';
-        if (tb[0] == tb[1] && tb[0] == tb[2]) {
+        if (tb[0] != '.' && tb[0] == tb[1] && tb[0] == tb[2]) {
             winP = tb[0];
-        } else if (tb[3] == tb[4] && tb[3] == tb[5]) {
+        } else if (tb[3] != '.' && tb[3] == tb[4] && tb[3] == tb[5]) {
             winP = tb[3];
-        } else if (tb[6] == tb[7] && tb[6] == tb[8]) {
+        } else if (tb[6] != '.' && tb[6] == tb[7] && tb[6] == tb[8]) {
             winP = tb[6];
-        } else if (tb[0] == tb[3] && tb[0] == tb[6]) {
+        } else if (tb[0] != '.' && tb[0] == tb[3] && tb[0] == tb[6]) {
             winP = tb[0];
-        } else if (tb[1] == tb[4] && tb[1] == tb[7]) {
+        } else if (tb[1] != '.' && tb[1] == tb[4] && tb[1] == tb[7]) {
             winP = tb[1];
-        } else if (tb[2] == tb[5] && tb[2] == tb[8]) {
+        } else if (tb[2] != '.' && tb[2] == tb[5] && tb[2] == tb[8]) {
             winP = tb[2];
-        } else if (tb[0] == tb[4] && tb[4] == tb[8]) {
+        } else if (tb[0] != '.' && tb[0] == tb[4] && tb[4] == tb[8]) {
             winP = tb[0];
-        } else if (tb[6] == tb[4] && tb[6] == tb[2]) {
+        } else if (tb[6] != '.' && tb[6] == tb[4] && tb[6] == tb[2]) {
             winP = tb[6];
         }
 
