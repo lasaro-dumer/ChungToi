@@ -60,6 +60,9 @@ public enum Movement {
     public static Movement processMovement(int currentPosition, int currOrientation, int direction, int movement) {
         Movement ret = Movement.valueOfCode(direction);
         if (ret != INVALID) {
+            if(movement == 0 && ret != STILL)
+                ret = STILL;
+
             boolean moveIsValid = (movement >= 0 && movement <= 2) && !(ret == STILL && movement != 0) && !(ret != STILL && movement == 0);
 
             if (ret.perpendicular && (currOrientation == Movement.PERPENDICULAR_VALUE) && moveIsValid) {

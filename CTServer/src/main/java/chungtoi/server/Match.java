@@ -73,23 +73,31 @@ public class Match {
         return this.blackPlayerId == userId;
     }
 
+    public MatchState getMatchState(){
+        return this.state;
+    }
+
+    private void setMatchState(MatchState newState){
+        this.state = newState;
+    }
+
     public int isMyTurn(int userId) {
         this.checkTimeouts();
         this.checkWinConditions();
         if (this.isWhitePlayer(userId)) {
-            return this.state.getWhiteResponse();
+            return this.getMatchState().getWhiteResponse();
         } else {
-            return this.state.getBlackResponse();
+            return this.getMatchState().getBlackResponse();
         }
     }
 
     private void checkTimeouts() {
         Long timeSpan = (System.currentTimeMillis() - this.lastActionTime) / 1000;
         if (timeSpan >= PLAYER_TIMEOUT) {
-            if (this.state == MatchState.WHITE_TURN) {
-                this.state = MatchState.BLACK_WIN_WO;
-            } else if (this.state == MatchState.BLACK_TURN) {
-                this.state = MatchState.WHITE_WIN_WO;
+            if (this.getMatchState() == MatchState.WHITE_TURN) {
+                this.setMatchState(MatchState.BLACK_WIN_WO);
+            } else if (this.getMatchState() == MatchState.BLACK_TURN) {
+                this.setMatchState(MatchState.WHITE_WIN_WO);
             }
         }
     }
@@ -112,7 +120,7 @@ public class Match {
 
     public boolean isActive() {
         this.checkTimeouts();
-        if (this.state.isEndState() && this.endedTime == null) {
+        if (this.getMatchState().isEndState() && this.endedTime == null) {
             this.endedTime = System.currentTimeMillis();
         }
         return this.endedTime == null;
@@ -123,16 +131,34 @@ public class Match {
         return boardString;
     }
 
-    public int placePiece(int userId, int position, int orientation) {
-        int ret = -3;
+    private void updateBoard(char[] newBoard){
+        this.board = newBoard;
+    }
+
+    public boolean canPlacePieces(int userId){
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
-        if ((whitePlayer && this.state != MatchState.WHITE_TURN)
-                || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
+        return (whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3);
+    }
+
+    public boolean canMovePieces(int userId){
+        boolean whitePlayer = this.isWhitePlayer(userId);
+        boolean blackPlayer = this.isBlackPlayer(userId);
+        return (whitePlayer && this.whitePiecesCount == 3) || (blackPlayer && this.blackPiecesCount == 3);
+    }
+
+    public int placePiece(int userId, int position, int orientation) {
+        int ret = -3;
+        char[] currBoard = this.getBoard().toCharArray();
+        MatchState currState = this.getMatchState();
+        boolean whitePlayer = this.isWhitePlayer(userId);
+        boolean blackPlayer = this.isBlackPlayer(userId);
+        if ((whitePlayer && currState != MatchState.WHITE_TURN)
+                || (blackPlayer && currState != MatchState.BLACK_TURN)) {
             return -4;
         }
 
-        if((whitePlayer && this.whitePiecesCount == 3) || (blackPlayer && this.blackPiecesCount == 3)){
+        if(!this.canPlacePieces(userId)){
             return -5;
         }
 
@@ -140,17 +166,18 @@ public class Match {
             || (orientation != 0 && orientation != 1))
             return ret;//-3
 
-        if (this.board[position] == '.') {
+        if (currBoard[position] == '.') {
             char piece = getPieceChar(whitePlayer, blackPlayer, orientation);
             if (piece != '.') {
-                this.board[position] = piece;
+                currBoard[position] = piece;
+                this.updateBoard(currBoard);
                 this.lastActionTime = System.currentTimeMillis();
                 if (whitePlayer) {
                     this.whitePiecesCount++;
-                    this.state = MatchState.BLACK_TURN;
+                    this.setMatchState(MatchState.BLACK_TURN);
                 } else {
                     this.blackPiecesCount++;
-                    this.state = MatchState.WHITE_TURN;
+                    this.setMatchState(MatchState.WHITE_TURN);
                 }
                 ret = 1;
             }
@@ -164,49 +191,54 @@ public class Match {
     public int movePiece(int userId, int currentPosition, int direction, int movement, int newOrientation) {
         int ret = -3;
         Movement mov = Movement.INVALID;
+        int currOrientation = -1;
+        char[] currBoard = this.getBoard().toCharArray();
+        MatchState currState = this.getMatchState();
         boolean whitePlayer = this.isWhitePlayer(userId);
         boolean blackPlayer = this.isBlackPlayer(userId);
 
-        if ((whitePlayer && this.state != MatchState.WHITE_TURN)
-                || (blackPlayer && this.state != MatchState.BLACK_TURN)) {
+        if ((whitePlayer && currState != MatchState.WHITE_TURN)
+                || (blackPlayer && currState != MatchState.BLACK_TURN)) {
             return -4;
         }
 
-        if((whitePlayer && this.whitePiecesCount < 3) || (blackPlayer && this.blackPiecesCount < 3)){
+        if(!this.canMovePieces(userId)){
             return -5;
         }
-        if((this.board[currentPosition] == '.'))
+        if((currBoard[currentPosition] == '.'))
             return 0;
 
-        System.out.println("is player turn " + userId);
-        if (currentPosition >= 0 && currentPosition <= 8 && (newOrientation == 0 || newOrientation == 1)) {
-            char piece = this.board[currentPosition];
-            int currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? 0 : 1;
+        if(Movement.valueOfCode(direction) == Movement.STILL && movement != 0)
+            movement = 0;
+        if (currentPosition >= 0 && currentPosition <= 8 && (newOrientation == Movement.PERPENDICULAR_VALUE || newOrientation == Movement.DIAGONAL_VALUE)) {
+            char piece = currBoard[currentPosition];
+            currOrientation = (piece == WHITE_CHAR_P || piece == BLACK_CHAR_P) ? Movement.PERPENDICULAR_VALUE : Movement.DIAGONAL_VALUE;
 
-            boolean isPieceOwner = (whitePlayer && (piece == WHITE_CHAR_D || piece == WHITE_CHAR_P))
-                    || (blackPlayer && (piece == BLACK_CHAR_D || piece == BLACK_CHAR_P));
-
-            if (isPieceOwner) {
+            if (isPieceOwner(whitePlayer, blackPlayer, piece)) {
                 mov = Movement.processMovement(currentPosition, currOrientation, direction, movement);
             }
         } else {
             return ret;
         }
 
-        boolean moveIsValid = (mov != Movement.STILL && this.board[mov.getNewPosition()] == '.')
-                || (mov == Movement.STILL && this.board[mov.getNewPosition()] != '.');
-        System.out.println("movement:" + mov + " and moveIsValid:" + moveIsValid);
-        System.out.println("newPosition[" + mov.getNewPosition() + "]= " + this.board[mov.getNewPosition()]);
+        int newPosition = mov.getNewPosition();
+        char newPosPiece = currBoard[newPosition];
+        boolean moveIsValid = (mov != Movement.STILL && newPosPiece == '.')
+                || (mov == Movement.STILL && newPosPiece != '.')
+                || (movement == 0 && mov == Movement.STILL && isPieceOwner(whitePlayer, blackPlayer, newPosPiece));
+        moveIsValid = moveIsValid && (movement != 0 || currOrientation != newOrientation);
+
         if (mov != Movement.INVALID && moveIsValid) {
             char piece = getPieceChar(whitePlayer, blackPlayer, newOrientation);
 
-            this.board[currentPosition] = '.';
-            this.board[mov.getNewPosition()] = piece;
+            currBoard[currentPosition] = '.';
+            currBoard[newPosition] = piece;
+            this.updateBoard(currBoard);
             this.lastActionTime = System.currentTimeMillis();
             if (whitePlayer) {
-                this.state = MatchState.BLACK_TURN;
+                this.setMatchState(MatchState.BLACK_TURN);
             } else {
-                this.state = MatchState.WHITE_TURN;
+                this.setMatchState(MatchState.WHITE_TURN);
             }
             ret = 1;
         } else {
@@ -227,6 +259,11 @@ public class Match {
             piece = BLACK_CHAR_D;
         }
         return piece;
+    }
+
+    private boolean isPieceOwner(boolean whitePlayer, boolean blackPlayer, char piece){
+        return (whitePlayer && (piece == WHITE_CHAR_D || piece == WHITE_CHAR_P))
+                || (blackPlayer && (piece == BLACK_CHAR_D || piece == BLACK_CHAR_P));
     }
 
     private void checkWinConditions() {
@@ -260,9 +297,9 @@ public class Match {
 
         if (winP != '.') {
             if (winP == WHITE_CHAR_P) {
-                this.state = MatchState.WHITE_WIN;
+                this.setMatchState(MatchState.WHITE_WIN);
             } else if (winP == BLACK_CHAR_P) {
-                this.state = MatchState.BLACK_WIN;
+                this.setMatchState(MatchState.BLACK_WIN);
             }
         }
     }

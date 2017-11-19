@@ -7,13 +7,13 @@ import chungtoi.server.Match;
 import java.util.LinkedList;
 import static org.mockito.Mockito.*;
 
-public class MatchTests extends TestCase{
+public class MatchVictoryTests extends TestCase{
     /**
      * Create the test case
      *
      * @param testName name of the test case
      */
-    public MatchTests(String testName) {
+    public MatchVictoryTests(String testName) {
         super(testName);
     }
 
@@ -21,7 +21,7 @@ public class MatchTests extends TestCase{
      * @return the suite of tests being tested
      */
     public static Test suite() {
-        return new TestSuite(MatchTests.class);
+        return new TestSuite(MatchVictoryTests.class);
     }
 
     public void test_FirstLineVictory_ForWhite(){
