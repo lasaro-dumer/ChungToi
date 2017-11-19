@@ -32,7 +32,6 @@ public class MatchMovementsTests extends TestCase{
         when(matchSpy.canMovePieces(2)).thenReturn(true);
         when(matchSpy.getBoard()).thenReturn("C.cE..ECE");
         int moveResult = matchSpy.movePiece(2,6,2,0,1);
-        System.out.println("moveResult: "+moveResult);
         assertTrue(moveResult == 1);
         reset(matchSpy);
         assertTrue(matchSpy.getBoard().equals("C.cE..eCE"));
@@ -45,7 +44,6 @@ public class MatchMovementsTests extends TestCase{
         when(matchSpy.canMovePieces(2)).thenReturn(true);
         when(matchSpy.getBoard()).thenReturn("C.cE..ECE");
         int moveResult = matchSpy.movePiece(2,6,2,0,0);
-        System.out.println("moveResult: "+moveResult);
         assertTrue(moveResult == 0);
         reset(matchSpy);
         assertTrue(!matchSpy.getBoard().equals("C.cE..ECE"));
@@ -59,7 +57,6 @@ public class MatchMovementsTests extends TestCase{
         when(matchSpy.getBoard()).thenReturn("C.cE..eCE");
         // 100:7:4:2:0
         int moveResult = matchSpy.movePiece(1,7,4,2,0);
-        System.out.println("moveResult: "+moveResult);
         assertTrue(moveResult == 0);
         reset(matchSpy);
         assertTrue(!matchSpy.getBoard().equals("C.cE..eCE"));

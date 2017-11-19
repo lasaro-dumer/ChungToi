@@ -532,7 +532,6 @@ public class ChungToi {
         boolean havePlayerPermit = false;
         boolean haveWaitQueuePermit = false;
         try {
-            this.log("Checking timeouts..");
             while(!havePlayerPermit)
                 havePlayerPermit = this.playerSem.tryAcquire();
             while(!haveWaitQueuePermit)
@@ -567,8 +566,6 @@ public class ChungToi {
             haveWaitQueuePermit = false;
             this.playerSem.release();
             havePlayerPermit = false;
-
-            this.log("ended checking timeouts");
         } catch (Exception e) {
             this.log(e);
             if(havePlayerPermit)
@@ -592,7 +589,6 @@ public class ChungToi {
                 havePlayerPermit = this.playerSem.tryAcquire();
             while(!haveWaitQueuePermit)
                 haveWaitQueuePermit = this.waitQueueSem.tryAcquire();
-            sb.append("Server time: " + sdf.format(resultdate) + "\n");
             sb.append("Players online: " + this.players.size() + "\n");
             sb.append("Player wainting a match: " + this.waitingList.size());
 
@@ -612,8 +608,12 @@ public class ChungToi {
         return ret;
     }
 
+    private String lastMessage = "";
     public void log(String message) {
-        System.out.println(String.format("[INFO] %s", message));
+        if(!message.equals(lastMessage)){
+            System.out.println(String.format("[INFO] %s", message));
+            lastMessage = message;
+        }
     }
 
     public void log(Exception ex) {

@@ -2,9 +2,11 @@ package chungtoi.server;
 
 public class ChungToiCleaner implements Runnable {
 	private ChungToi chungToi;
+	private String lastStatus;
 
 	public ChungToiCleaner(ChungToi chungToi){
 		this.chungToi = chungToi;
+		this.lastStatus = "";
 	}
 
 	@Override
@@ -14,7 +16,11 @@ public class ChungToiCleaner implements Runnable {
 			if (removedPlayers > 0) {
 				chungToi.log(String.format("Removed %s players", removedPlayers));
 			}
-			chungToi.log(chungToi.printStatus());
+			String status = chungToi.printStatus();
+			if(!status.equals(this.lastStatus)){
+				chungToi.log(status);
+				this.lastStatus = status;
+			}
 		} catch (Exception e) {
 			chungToi.log(e);
 		}

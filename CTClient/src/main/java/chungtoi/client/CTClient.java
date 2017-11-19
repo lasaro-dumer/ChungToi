@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Files;
+import javax.xml.ws.BindingProvider;
 
 /**
  *
@@ -26,12 +27,33 @@ public class CTClient {
             ChungToiWS service = new ChungToiWS();
             ChungToi chungToi = service.getChungToiPort();
 
-            if(args.length == 0){
+            String path = "";
+            boolean useCloud = false;
+            for (int i=0; i<args.length; i++) {
+                if(args[i].equals("-c")){
+                    useCloud = true;
+                }else {
+                    path = args[i];
+                }
+            }
+
+            if(useCloud){
+                String cloudURL = "http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS";
+                BindingProvider bindingProvider = (BindingProvider) chungToi;
+                bindingProvider.getRequestContext().put(
+                    BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                    cloudURL);
+            }
+            System.out.println(String.format("Endpoint being used: %s", (useCloud?"cloud":"localhost")));
+
+            if(path.equals("")){
+                System.out.println("Starting InteractiveClient");
                 InteractiveClient client = new InteractiveClient(chungToi);
                 client.startGame();
             }
             else{
-                String path = args[0];
+                System.out.println("Starting BatchClient");
+
                 Path file = new File(path).toPath();
 
                 boolean exists =      Files.exists(file);        // Check if the file exists
