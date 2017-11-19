@@ -10,6 +10,7 @@ import chungtoi.client.proxy.ChungToi;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
@@ -66,23 +67,24 @@ public class CTClient {
                         File[] files = dir.listFiles();
                         for (File f : files) {
                             Path filePath = f.toPath();
-                            if(filePath.toString().endsWith(".in") || filePath.toString().endsWith(".lst"))
+                            if(filePath.toString().endsWith(".in"))
                                 filesToProcess.add(filePath);
                         }
-                        System.out.println("Found files "+files.length+" in folder "+path+", and "+filesToProcess.size()+" will be processed");
+                        System.out.println("Found ["+files.length+"] files in folder ["+path+"], and ["+filesToProcess.size()+"] will be processed");
                     }
                     else{
                         filesToProcess.add(file);
                     }
                     for (Path f : filesToProcess) {
                         if(f.toString().endsWith(".in")){
-                            String fileRad = f.toString();
-                            fileRad = fileRad.substring(0, fileRad.lastIndexOf("."));
-                            System.out.println("fileRad: " + fileRad);
-                            BatchClient bc = new BatchClient(chungToi);
-                            bc.executaTeste(fileRad);
+                            batchTestFile(chungToi, f.toString());
                         } else if (f.toString().endsWith(".lst")) {
                             System.out.println("This is a test list");
+                            List<String> listItems = new ArrayList<>();
+                            listItems = Files.lines(f).collect(Collectors.toList());
+                            for (String item : listItems) {
+                                batchTestFile(chungToi, item);
+                            }
                         } else {
                             System.out.println("Invalid file ["+f.toString()+"] skipped.");
                         }
@@ -95,5 +97,12 @@ public class CTClient {
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage() + "\n" + e.getStackTrace().toString());
         }
+    }
+
+    private static void batchTestFile(ChungToi chungToi, String filePath) throws Exception{
+        String fileRad = filePath.substring(0, filePath.lastIndexOf("."));
+        System.out.println("fileRad: " + fileRad);
+        BatchClient bc = new BatchClient(chungToi);
+        bc.executaTeste(fileRad);
     }
 }
