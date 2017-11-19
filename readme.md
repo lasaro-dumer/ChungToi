@@ -46,10 +46,10 @@ Some examples are:
 ```
 #### The Cloud Switch
 
-The Web Service is already deploy in a Azure VM, sou you can call it using this [WSDL URL](http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS)
+The Web Service is already deploy in a Azure VM, so you can call it using this [WSDL URL](http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS)
 
-To use the cloud endpoint in the client you can send the `-c` argument, as shown in the example
+To use the cloud endpoint in the client you can send the `-c` argument (in any mode and with any input file/folder), as shown in the example
 
 ```bash
-	ChungToi$ java -jar CTClient/target/CTClient-1.0-jar-with-dependencies.jar samples/ChungToi-0000.in -c
+	ChungToi$ java -jar CTClient/target/CTClient-1.0-jar-with-dependencies.jar -c [file/folder]
 ```

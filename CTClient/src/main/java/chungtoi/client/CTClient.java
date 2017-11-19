@@ -23,6 +23,8 @@ import javax.xml.ws.BindingProvider;
  * @author lasaro
  */
 public class CTClient {
+    private static String cloudURL = "http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS";
+
     public static void main(String[] args) {
         try {
             ChungToiWS service = new ChungToiWS();
@@ -31,7 +33,10 @@ public class CTClient {
             String path = "";
             boolean useCloud = false;
             for (int i=0; i<args.length; i++) {
-                if(args[i].equals("-c")){
+                if(args[i].equals("-h")){
+                    printHelp();
+                    return;
+                }else if(args[i].equals("-c")){
                     useCloud = true;
                 }else {
                     path = args[i];
@@ -39,7 +44,6 @@ public class CTClient {
             }
 
             if(useCloud){
-                String cloudURL = "http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS";
                 BindingProvider bindingProvider = (BindingProvider) chungToi;
                 bindingProvider.getRequestContext().put(
                     BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
@@ -104,5 +108,19 @@ public class CTClient {
         System.out.println("fileRad: " + fileRad);
         BatchClient bc = new BatchClient(chungToi);
         bc.executaTeste(fileRad);
+    }
+
+    private static void printHelp(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s\n", "Usage:"));
+        sb.append(String.format("%s\n", "\tCTClient-*.jar [-c] [file|directory]"));
+        sb.append(String.format("%s\n", "\t-c\tuse could URL ("+cloudURL+")"));
+        sb.append(String.format("\n"));
+        sb.append(String.format("%s\n", "\tfile|directory"));
+        sb.append(String.format("%s\n", "\t\tIf the argument is a file it can be:"));
+        sb.append(String.format("%s\n", "\t\t\t.in : a file to be processed, generating a .out"));
+        sb.append(String.format("%s\n", "\t\t\t.lst: a file with one or more .in to be processed"));
+        sb.append(String.format("%s\n", "\t\tIf the argument is a directory all the .in file in it will be processed"));
+        System.out.println(sb.toString());
     }
 }

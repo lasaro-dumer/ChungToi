@@ -53,13 +53,7 @@ public class ChungToi {
     }
 
     /**
-     * (usada para viabilizar o teste): informa ao servidor o nome de um
-     * jogador (o primeiro da dupla), o identificador que o servidor deverá utilizar para este primeiro
-     * jogador, o nome de outro jogador (o segundo da dupla) e o respectivo identificador que o servidor
-     * deverá utilizar para este segundo jogador. Esta operação retorna sempre 0 e não haverá nenhuma
-     * inconsistência   nas   entradas   referente   às   operações   de  
-     * pré­registro   (ou   seja,   elas   serão   sempre consistentes). This
-     * method is used to allow a better testing approach. It receives the names
+     * This method is used to allow a better testing approach. It receives the names
      * of the players and also their names
      *
      * @param playerOneName the name of the first player
