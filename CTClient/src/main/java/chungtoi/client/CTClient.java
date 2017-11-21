@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.Files;
 import javax.xml.ws.BindingProvider;
 
@@ -33,6 +34,7 @@ public class CTClient {
             String path = "";
             boolean useCloud = false;
             String secondaryURL = "";
+            String baseDir = "";
             for (int i=0; i<args.length; i++) {
                 if(args[i].equals("-h")){
                     printHelp();
@@ -42,6 +44,9 @@ public class CTClient {
                 }else if(args[i].equals("-u")){
                     i++;
                     secondaryURL = args[i];
+                }else if(args[i].equals("-b")){
+                    i++;
+                    baseDir = args[i];
                 }else {
                     path = args[i];
                 }
@@ -77,7 +82,24 @@ public class CTClient {
                 System.out.println(String.format("Unable to estabilish connection with the server"));
                 return;
             }
-            if(path.equals("")){
+
+            if(!baseDir.equals("")){
+                List sequential = new ArrayList<>();
+                sequential.add(Paths.get(baseDir,"ChungToi-0000").toString());
+                sequential.add(Paths.get(baseDir,"ChungToi-0100").toString());
+                sequential.add(Paths.get(baseDir,"ChungToi-1000").toString());
+                sequential.add(Paths.get(baseDir,"ChungToi-3000").toString());
+                List parallel1 = new ArrayList<>();
+                parallel1.add(Paths.get(baseDir,"ChungToi-2000").toString());
+                parallel1.add(Paths.get(baseDir,"ChungToi-2500").toString());
+                List parallel2 = new ArrayList<>();
+                parallel2.add(Paths.get(baseDir,"ChungToi-4000").toString());
+                parallel2.add(Paths.get(baseDir,"ChungToi-4500").toString());
+                BatchClient bc = new BatchClient(chungToi);
+                bc.runSequential(sequential);
+                bc.runParallel(parallel1);
+                bc.runParallel(parallel2);
+            }else if(path.equals("")){
                 System.out.println("Starting InteractiveClient");
                 InteractiveClient client = new InteractiveClient(chungToi);
                 client.startGame();

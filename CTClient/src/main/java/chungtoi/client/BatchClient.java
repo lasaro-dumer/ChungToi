@@ -10,6 +10,9 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import chungtoi.client.proxy.ChungToi;
 
@@ -25,19 +28,64 @@ public class BatchClient {
         this.port = servicePort;
     }
 
+    public void runParallel(List<String> tests) {
+        List<Thread> threads = new ArrayList<>();
+
+        // Prepara threads
+        for(String test : tests) {
+            threads.add(new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        executaTeste(test);
+                    } catch (IOException ex) {
+                        System.out.println("Falha na execução do teste.");
+                        ex.printStackTrace(System.out);
+                    }
+                }
+            });
+        }
+
+        // Roda threads
+        for(Thread t : threads) {
+            t.start();
+        }
+
+        for(Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException ex) {
+                System.out.println("Falha ao reagrupar thread.");
+                ex.printStackTrace(System.out);
+            }
+        }
+        System.out.println("Teste paralelo concluido.");
+    }
+
+    public void runSequential(List<String> tests) {
+        for(String test : tests) {
+            try {
+                executaTeste(test);
+            } catch (IOException ex) {
+                System.out.println("Falha ao executar teste " + test);
+                ex.printStackTrace(System.out);
+            }
+        }
+        System.out.println("Teste sequencial concluido.");
+    }
+
     private int preRegistro(java.lang.String j1, int id1, java.lang.String j2, int id2) {
         return port.preRegistro(j1, id1, j2, id2);
     }
 
     public void executaTeste(String rad) throws IOException {
-        String inFile = rad+".in";
+        String inFile = rad + ".in";
         FileInputStream is = new FileInputStream(new File(inFile));
-        System.setIn(is);
+        //System.setIn(is);
 
-        String outFile = rad+".out";
+        String outFile = rad + ".out";
         FileWriter outWriter = new FileWriter(outFile);
-        try (PrintWriter out = new PrintWriter(outWriter)) {
-            Scanner leitura = new Scanner(System.in);
+        try (PrintWriter out = new PrintWriter(outWriter); Scanner leitura = new Scanner(is)) {
             int numOp = leitura.nextInt();
             for (int i=0;i<numOp;++i) {
                 System.out.print("\r"+rad+": "+(i+1)+"/"+numOp);
