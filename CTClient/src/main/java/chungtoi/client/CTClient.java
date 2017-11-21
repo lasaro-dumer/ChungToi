@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Files;
 import javax.xml.ws.BindingProvider;
@@ -24,11 +25,10 @@ import javax.xml.ws.BindingProvider;
  */
 public class CTClient {
     private static String cloudURL = "http://solr-impbd.eastus.cloudapp.azure.com:8080/ctwebservice/ChungToiWS";
+    private static String cloudURL_WSDL = cloudURL+"?wsdl";
 
     public static void main(String[] args) {
         try {
-            ChungToiWS service = new ChungToiWS();
-            ChungToi chungToi = service.getChungToiPort();
 
             String path = "";
             boolean useCloud = false;
@@ -43,14 +43,32 @@ public class CTClient {
                 }
             }
 
-            if(useCloud){
-                BindingProvider bindingProvider = (BindingProvider) chungToi;
-                bindingProvider.getRequestContext().put(
-                    BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                    cloudURL);
+            ChungToiWS service = null;
+            ChungToi chungToi = null;
+            try{
+                if(useCloud){
+                    service = new ChungToiWS(new URL(cloudURL_WSDL));
+                    chungToi = service.getChungToiPort();
+                    BindingProvider bindingProvider = (BindingProvider) chungToi;
+                    bindingProvider.getRequestContext().put(
+                        BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
+                        cloudURL);
+                }else{
+                    service = new ChungToiWS();
+                    chungToi = service.getChungToiPort();
+                }
             }
+            catch(Exception e){
+                service = null;
+                chungToi = null;
+            }
+
             System.out.println(String.format("Endpoint being used: %s", (useCloud?"cloud":"localhost")));
 
+            if(service == null || chungToi == null){
+                System.out.println(String.format("Unable to estabilish connection with the server"));
+                return;
+            }
             if(path.equals("")){
                 System.out.println("Starting InteractiveClient");
                 InteractiveClient client = new InteractiveClient(chungToi);
