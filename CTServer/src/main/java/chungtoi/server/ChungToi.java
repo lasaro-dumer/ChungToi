@@ -32,6 +32,7 @@ public class ChungToi {
     private Map<Integer, Player> players;
     private Integer nextUserId;
     private List<Integer> waitingList;
+    private final Semaphore preSignupSem;
     private final Semaphore playerSem;
     private final Semaphore waitQueueSem;
     private SimpleDateFormat sdf;
@@ -43,6 +44,7 @@ public class ChungToi {
         this.players = new HashMap<>();
         this.nextUserId = 1;
         this.waitingList = new ArrayList(this.MAX_PLAYERS);
+        this.preSignupSem = new Semaphore(1, true);
         this.playerSem = new Semaphore(1, true);
         this.waitQueueSem = new Semaphore(1, true);
         this.sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -69,7 +71,10 @@ public class ChungToi {
             @WebParam(name = "playerTwoName") String playerTwoName,
             @WebParam(name = "playerTwoId") int playerTwoId) {
         int ret = -1;
+        boolean havePreSignupPermit = false;
         try {
+            while(!havePreSignupPermit)
+                havePreSignupPermit = this.preSignupSem.tryAcquire();
             if (!this.preSignupMap.containsKey(playerOneName)) {
                 this.preSignupMap.put(playerOneName, 0);
             }
@@ -80,8 +85,12 @@ public class ChungToi {
             this.preSignupMap.put(playerTwoName, playerTwoId);
             this.preSignupMatchMap.put(playerOneId, playerTwoId);
             ret = 0;
+            this.preSignupSem.release();
+            havePreSignupPermit = false;
         } catch (Exception e) {
             this.log(e);
+            if(havePreSignupPermit)
+                this.preSignupSem.release();
         }
         return ret;
     }
@@ -102,6 +111,7 @@ public class ChungToi {
         int userId = -3;
         boolean havePlayerPermit = false;
         boolean haveWaitQueuePermit = false;
+        boolean havePreSignupPermit = false;
         try {
             while(!havePlayerPermit)
                 havePlayerPermit = this.playerSem.tryAcquire();
@@ -109,6 +119,8 @@ public class ChungToi {
                 return -1;
             if (this.players.size() == this.MAX_PLAYERS)
                 return -2;
+            while(havePreSignupPermit)
+                havePreSignupPermit = this.preSignupSem.tryAcquire();
             if (this.preSignupMap.containsKey(name)) {
                 userId = this.preSignupMap.get(name);
             } else {
@@ -146,12 +158,16 @@ public class ChungToi {
             }
             this.waitQueueSem.release();
             haveWaitQueuePermit = false;
+            this.preSignupSem.release();
+            havePreSignupPermit = false;
             this.playerSem.release();
             havePlayerPermit = false;
         } catch (Exception e) {
             this.log(e);
             if(havePlayerPermit)
                 this.playerSem.release();
+            if(havePreSignupPermit)
+                this.preSignupSem.release();
             if(haveWaitQueuePermit)
                 this.waitQueueSem.release();
         }

@@ -32,12 +32,16 @@ public class CTClient {
 
             String path = "";
             boolean useCloud = false;
+            String secondaryURL = "";
             for (int i=0; i<args.length; i++) {
                 if(args[i].equals("-h")){
                     printHelp();
                     return;
                 }else if(args[i].equals("-c")){
                     useCloud = true;
+                }else if(args[i].equals("-u")){
+                    i++;
+                    secondaryURL = args[i];
                 }else {
                     path = args[i];
                 }
@@ -47,15 +51,19 @@ public class CTClient {
             ChungToi chungToi = null;
             try{
                 if(useCloud){
-                    service = new ChungToiWS(new URL(cloudURL_WSDL));
+                    secondaryURL = cloudURL;
+                }
+
+                if(secondaryURL.equals("")){
+                    service = new ChungToiWS();
+                    chungToi = service.getChungToiPort();
+                }else{
+                    service = new ChungToiWS(new URL(secondaryURL+"?wsdl"));
                     chungToi = service.getChungToiPort();
                     BindingProvider bindingProvider = (BindingProvider) chungToi;
                     bindingProvider.getRequestContext().put(
                         BindingProvider.ENDPOINT_ADDRESS_PROPERTY,
-                        cloudURL);
-                }else{
-                    service = new ChungToiWS();
-                    chungToi = service.getChungToiPort();
+                        secondaryURL);
                 }
             }
             catch(Exception e){
@@ -63,7 +71,7 @@ public class CTClient {
                 chungToi = null;
             }
 
-            System.out.println(String.format("Endpoint being used: %s", (useCloud?"cloud":"localhost")));
+            System.out.println(String.format("Endpoint being used: %s", (secondaryURL.equals("")?"localhost":secondaryURL)));
 
             if(service == null || chungToi == null){
                 System.out.println(String.format("Unable to estabilish connection with the server"));
